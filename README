@@ -1,0 +1,21 @@
+
+
+requirements:
+
+    java jdk
+
+
+* tested with openjdk version "1.8.0_171"
+
+
+
+
+
+command compile
+
+    - javac -cp ':libs/twitter4j-core-4.0.4.jar:.' TestApp.java
+
+
+command run
+
+    - java -cp ':libs/twitter4j-core-4.0.4.jar:.' TestApp
