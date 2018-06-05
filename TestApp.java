@@ -1,40 +1,95 @@
-import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.TwitterFactory;
-import twitter4j.Twitter;
+import java.util.List;
+import java.util.Map;
+
+import twitter4j.RateLimitStatus;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.TwitterException;
 import twitter4j.Status;
+import twitter4j.api.UsersResources;
 
-import java.util.List;
-
+import TwitterAnalytics.TwitterApi;
+import twitter4j.User;
+import twitter4j.ResponseList;
+import twitter4j.api.TimelinesResources;
 
 
 public class TestApp
 {
 
-	public static void main(String[] args)
+	public void showRateLimits()
 	{
-		ConfigurationBuilder confBuilder = new ConfigurationBuilder();
-
-		confBuilder.setDebugEnabled(true)
-				.setOAuthConsumerKey(Config.CONSUMER_KEY)
-				.setOAuthConsumerSecret(Config.CONSUMER_SECRET)
-				.setOAuthAccessToken(Config.ACCESS_TOKEN)
-				.setOAuthAccessTokenSecret(Config.ACCESS_TOKEN_SECRET);
-
-		TwitterFactory twitterFactory = new TwitterFactory(confBuilder.build());
-
-		Twitter twitter = twitterFactory.getInstance();
-
 		try
 		{
-			Query query = new Query("#GolGR");
+			Map<String, RateLimitStatus> limits = TwitterApi.instance().getRateLimitStatus();
+
+			for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
+			{
+				System.out.println(entry.getKey() + " : " + entry.getValue());
+			}
+		}
+		catch(TwitterException twitterException)
+		{
+			twitterException.printStackTrace();
+			System.out.println("Failed : " + twitterException.getMessage());
+		}
+	}
+
+
+	public void findUsers(String search_string)
+	{
+		try
+		{
+			UsersResources userResource = TwitterApi.instance().users();
+
+			ResponseList<User> users = userResource.lookupUsers(search_string);
+
+			for(User user : users)
+			{
+				System.out.println(user.getName());
+
+				this.userTimeline(user.getId());
+			}
+		}
+		catch(TwitterException twitterException)
+		{
+			twitterException.printStackTrace();
+			System.out.println("Failed : " + twitterException.getMessage());
+		}
+	}
+
+
+	public void userTimeline(long user_id)
+	{
+		try
+		{
+			TimelinesResources timelinesResource = TwitterApi.instance().timelines();
+
+			ResponseList<Status> statuses = timelinesResource.getUserTimeline(user_id);
+
+			for(Status status : statuses)
+			{
+				System.out.println(status.getText());
+			}
+		}
+		catch(TwitterException twitterException)
+		{
+			twitterException.printStackTrace();
+			System.out.println("Failed : " + twitterException.getMessage());
+		}
+	}
+
+
+	public void search(String query_string)
+	{
+		try
+		{
+			Query query = new Query(query_string);
 			QueryResult result;
 
 			do
 			{
-				result = twitter.search(query);
+				result = TwitterApi.instance().search(query);
 				List<Status> tweets = result.getTweets();
 
 				for(Status tweet : tweets)
@@ -44,14 +99,22 @@ public class TestApp
 
 			}
 			while( (query = result.nextQuery()) != null );
-
 		}
 		catch(TwitterException te)
 		{
 			te.printStackTrace();
 			System.out.println("Failed to search tweets: " + te.getMessage());
-			System.exit(-1);
 		}
+	}
+
+
+	public static void main(String[] args)
+	{
+		TestApp testApp = new TestApp();
+
+		//testApp.showRateLimits();
+		//testApp.search("#GolGR");
+		testApp.findUsers("Kathimerini_gr");
 
 		System.out.println("all ok");
 	}
