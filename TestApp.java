@@ -1,20 +1,13 @@
+import twitter4j.*;
+import twitter4j.api.UsersResources;
 import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.TwitterFactory;
-import twitter4j.Twitter;
-import twitter4j.Query;
-import twitter4j.QueryResult;
-import twitter4j.TwitterException;
-import twitter4j.Status;
 
 import java.util.List;
-
-
 
 public class TestApp
 {
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) throws TwitterException {
 		ConfigurationBuilder confBuilder = new ConfigurationBuilder();
 
 		confBuilder.setDebugEnabled(true)
@@ -27,30 +20,12 @@ public class TestApp
 
 		Twitter twitter = twitterFactory.getInstance();
 
-		try
-		{
-			Query query = new Query("#GolGR");
-			QueryResult result;
+		UsersResources userResource = twitter.users();
 
-			do
-			{
-				result = twitter.search(query);
-				List<Status> tweets = result.getTweets();
+		ResponseList<User> users = userResource.lookupUsers("Kathimerini_gr");
 
-				for(Status tweet : tweets)
-				{
-					System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
-				}
+		for(User user : users) {
 
-			}
-			while( (query = result.nextQuery()) != null );
-
-		}
-		catch(TwitterException te)
-		{
-			te.printStackTrace();
-			System.out.println("Failed to search tweets: " + te.getMessage());
-			System.exit(-1);
 		}
 
 		System.out.println("all ok");
