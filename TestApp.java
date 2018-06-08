@@ -119,6 +119,48 @@ public class TestApp
 	}
 
 
+	public void search(String query_string, int max_results)
+	{
+		try
+		{
+			Query query = new Query(query_string);
+			query.setResultType(Query.RECENT);
+
+			QueryResult result;
+
+			int tweet_counter = 0;
+
+			do
+			{
+				result = TwitterApi.instance().search(query);
+
+				List<Status> tweets = result.getTweets();
+
+				for(Status tweet : tweets)
+				{
+					if(tweet.isRetweet())
+					{
+						continue;
+					}
+
+					tweet_counter++;
+
+					System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
+				}
+
+			}
+			while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
+
+			System.out.println("counter is: " + tweet_counter);
+		}
+		catch(TwitterException te)
+		{
+			te.printStackTrace();
+			System.out.println("Failed to search tweets: " + te.getMessage());
+		}
+	}
+
+
 	public List<Trend> getTopTrends(int woeid, int top)
 	{
 		try
@@ -148,7 +190,7 @@ public class TestApp
 		{
 			System.out.println("name: " + trend.getName() + ", query: " + trend.getQuery() + ", url: " + trend.getURL());
 
-			this.search( trend.getQuery() );
+			this.search( trend.getQuery(), 100 );
 		}
 	}
 
