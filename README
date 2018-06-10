@@ -13,9 +13,9 @@ requirements:
 
 command compile
 
-    - javac -cp ':libs/twitter4j-core-4.0.4.jar:.' TestApp.java
+    - javac -cp ':libs/twitter4j-core-4.0.4.jar:libs/gson-2.8.5.jar:.' TestApp.java
 
 
 command run
 
-    - java -cp ':libs/twitter4j-core-4.0.4.jar:.' TestApp
+    - java -cp ':libs/twitter4j-core-4.0.4.jar:libs/gson-2.8.5.jar:.' TestApp

@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
@@ -16,9 +15,9 @@ import TwitterAnalytics.TwitterApi;
 import twitter4j.User;
 import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
-import twitter4j.api.TrendsResources;
 import twitter4j.Trends;
 import twitter4j.Trend;
+
 
 
 public class TestApp
