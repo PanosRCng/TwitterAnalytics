@@ -1,3 +1,8 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +49,8 @@ public class TestApp
 			{
 				System.out.println(user.getName());
 
-				this.userStats(user);
+				//this.userStats(user, false);
+				this.userStats(user, true);
 
 				//this.userTimeline(user.getId());
 			}
@@ -166,12 +172,40 @@ public class TestApp
 		}
 	}
 
-	public void userStats(User user){
+	public void userStats(User user, boolean insertInTable){
 
 		System.out.println("Number of statuses : " + user.getStatusesCount());
 		System.out.println("Number of favourites : " + user.getFavouritesCount());
 		System.out.println("Number of followers : " + user.getFollowersCount());
 		System.out.println("Number of friends : " + user.getFriendsCount());
+
+		if(insertInTable){
+
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			final String stringDate= dateFormat.format(new Date());
+			final java.sql.Date sqlDate=  java.sql.Date.valueOf(stringDate);
+
+			String query = " insert into userStats (userID, numStatus, numFavourite, numFollowers, numFriends, submissionDate)"
+					+ " values (?, ?, ?, ?, ?, ?)";
+
+			PreparedStatement preparedStmt = null;
+			try {
+				preparedStmt = TwitterApi.twitterApiInstance().getConnection().prepareStatement(query);
+
+				preparedStmt.setInt    (1, (int) user.getId());
+				preparedStmt.setInt    (2, user.getStatusesCount());
+				preparedStmt.setInt    (3, user.getFavouritesCount());
+				preparedStmt.setInt    (4, user.getFollowersCount());
+				preparedStmt.setInt    (5, user.getFriendsCount());
+				preparedStmt.setDate   (6, sqlDate);
+
+				// execute the preparedstatement
+				preparedStmt.execute();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
 
 	}
 
@@ -180,8 +214,18 @@ public class TestApp
 		TestApp testApp = new TestApp();
 
 		//testApp.showRateLimits();
-		testApp.search("#GolGR", "2018-06-05", "2018-06-07");
-		//testApp.findUsers("Kathimerini_gr");
+		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
+
+		TwitterApi.twitterApiInstance().setConnection();
+
+		testApp.findUsers("Kathimerini_gr");
+
+		Connection connection = TwitterApi.twitterApiInstance().getConnection();
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 		System.out.println("all ok");
 	}
