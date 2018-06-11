@@ -1,7 +1,9 @@
-package TwitterAnalytics.ConfigManager;
+package TwitterAnalytics.ConfigManager.Templates;
 
 
-public class Env extends Settings
+import TwitterAnalytics.ConfigManager.Settings;
+
+public class TwitterApi extends Settings
 {
 
     public String CONSUMER_KEY;
@@ -10,7 +12,7 @@ public class Env extends Settings
     public String ACCESS_TOKEN_SECRET;
 
 
-    public Env()
+    public TwitterApi()
     {
         //
     }

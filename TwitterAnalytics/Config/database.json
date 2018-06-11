@@ -1,0 +1,7 @@
+{
+  "DATABASE_SERVER" : "localhost",
+  "DATABASE_PORT" : 3306,
+  "DATABASE_NAME" : "XXXX",
+  "DATABASE_USER" : "XXXX",
+  "DATABASE_PASSWORD" : "XXXX"
+}

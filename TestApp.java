@@ -3,6 +3,8 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
 
+import TwitterAnalytics.ConfigManager.Config;
+import TwitterAnalytics.DB;
 import twitter4j.RateLimitStatus;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -18,6 +20,8 @@ import twitter4j.api.TimelinesResources;
 import twitter4j.Trends;
 import twitter4j.Trend;
 
+import java.sql.Statement;
+import java.sql.ResultSet;
 
 
 public class TestApp
@@ -27,7 +31,7 @@ public class TestApp
 	{
 		try
 		{
-			Map<String, RateLimitStatus> limits = TwitterApi.instance().getRateLimitStatus();
+			Map<String, RateLimitStatus> limits = TwitterApi.client().getRateLimitStatus();
 
 			for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
 			{
@@ -46,7 +50,7 @@ public class TestApp
 	{
 		try
 		{
-			UsersResources userResource = TwitterApi.instance().users();
+			UsersResources userResource = TwitterApi.client().users();
 
 			ResponseList<User> users = userResource.lookupUsers(search_string);
 
@@ -69,7 +73,7 @@ public class TestApp
 	{
 		try
 		{
-			TimelinesResources timelinesResource = TwitterApi.instance().timelines();
+			TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
 			ResponseList<Status> statuses = timelinesResource.getUserTimeline(user_id);
 
@@ -98,7 +102,7 @@ public class TestApp
 
 			do
 			{
-				result = TwitterApi.instance().search(query);
+				result = TwitterApi.client().search(query);
 
 				List<Status> tweets = result.getTweets();
 
@@ -131,7 +135,7 @@ public class TestApp
 
 			do
 			{
-				result = TwitterApi.instance().search(query);
+				result = TwitterApi.client().search(query);
 
 				List<Status> tweets = result.getTweets();
 
@@ -164,7 +168,7 @@ public class TestApp
 	{
 		try
 		{
-			TrendsResources trendsResources = TwitterApi.instance().trends();
+			TrendsResources trendsResources = TwitterApi.client().trends();
 
 			Trends trends = trendsResources.getPlaceTrends(woeid);
 			Trend[] trendsArray = trends.getTrends();
@@ -202,7 +206,27 @@ public class TestApp
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
-		testApp.getTrends(23424833);
+		//testApp.getTrends(23424833);
+
+
+		try
+		{
+			Statement stmt = DB.conn().createStatement();
+			ResultSet rs;
+
+			rs = stmt.executeQuery("select * from test");
+
+			while(rs.next())
+			{
+				String lastName = rs.getString("value");
+				System.out.println(lastName);
+			}
+		}
+		catch(Exception ex)
+		{
+
+		}
+
 
 		System.out.println("all ok");
 	}

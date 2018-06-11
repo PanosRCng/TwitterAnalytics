@@ -19,10 +19,10 @@ public class TwitterApi
         ConfigurationBuilder confBuilder = new ConfigurationBuilder();
 
         confBuilder.setDebugEnabled(true)
-                .setOAuthConsumerKey(Config.instance().twitter_api().CONSUMER_KEY)
-                .setOAuthConsumerSecret(Config.instance().twitter_api().CONSUMER_SECRET)
-                .setOAuthAccessToken(Config.instance().twitter_api().ACCESS_TOKEN)
-                .setOAuthAccessTokenSecret(Config.instance().twitter_api().ACCESS_TOKEN_SECRET);
+                .setOAuthConsumerKey(Config.twitter_api().CONSUMER_KEY)
+                .setOAuthConsumerSecret(Config.twitter_api().CONSUMER_SECRET)
+                .setOAuthAccessToken(Config.twitter_api().ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(Config.twitter_api().ACCESS_TOKEN_SECRET);
 
         TwitterFactory twitterFactory = new TwitterFactory(confBuilder.build());
 
@@ -36,15 +36,10 @@ public class TwitterApi
     }
 
 
-    public static Twitter instance()
+    public static Twitter client()
     {
-        return SingletonHelper.INSTANCE.twitter();
+        return SingletonHelper.INSTANCE.twitter;
     }
 
-
-    private Twitter twitter()
-    {
-        return this.twitter;
-    }
 
 }
