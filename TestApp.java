@@ -1,8 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.text.DateFormat;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +46,9 @@ public class TestApp
 				System.out.println(user.getName());
 
 				//this.userStats(user, false);
-				this.userStats(user, true);
+				//this.userStats(user, true);
+
+				this.printUserStatsByDate(user);
 
 				//this.userTimeline(user.getId());
 			}
@@ -205,6 +203,37 @@ public class TestApp
 				e.printStackTrace();
 			}
 
+		}
+
+	}
+
+	public void printUserStatsByDate(User user){
+
+		String query = " select * from userStats where userID=? order by submissionDate";
+
+		PreparedStatement preparedStmt = null;
+		try {
+			preparedStmt = TwitterApi.twitterApiInstance().getConnection().prepareStatement(query);
+
+			preparedStmt.setInt(1, (int) user.getId());
+
+			ResultSet rs = preparedStmt.executeQuery();
+
+			while (rs.next())
+			{
+				int numStatuses = rs.getInt("numStatus");
+				int numFriends = rs.getInt("numFriends");
+				int numFavourites = rs.getInt("numFavourite");
+				int numFollowers = rs.getInt("numFollowers");
+				Date dateSubmitted = rs.getDate("submissionDate");
+				// print the results
+				System.out.format("Date : %s, Number of Statuses : %s, Number of friends : %s, " +
+								"Number of Favourites : %s, Number of Followers : %s\n",
+						dateSubmitted, numStatuses, numFriends, numFavourites, numFollowers);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 
 	}
