@@ -1,14 +1,20 @@
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import twitter4j.*;
 import twitter4j.api.UsersResources;
 
 import TwitterAnalytics.TwitterApi;
 import twitter4j.api.TimelinesResources;
+import TwitterAnalytics.DB;
 
 
 public class TestApp
@@ -18,7 +24,7 @@ public class TestApp
 	{
 		try
 		{
-			Map<String, RateLimitStatus> limits = TwitterApi.instance().getRateLimitStatus();
+			Map<String, RateLimitStatus> limits = TwitterApi.client().getRateLimitStatus();
 
 			for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
 			{
@@ -37,7 +43,7 @@ public class TestApp
 	{
 		try
 		{
-			UsersResources userResource = TwitterApi.instance().users();
+			UsersResources userResource = TwitterApi.client().users();
 
 			ResponseList<User> users = userResource.lookupUsers(search_string);
 
@@ -65,15 +71,44 @@ public class TestApp
 	{
 		try
 		{
-			TimelinesResources timelinesResource = TwitterApi.instance().timelines();
+			TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
 			ResponseList<Status> statuses = timelinesResource.getUserTimeline(user_id);
 
 			for(Status status : statuses)
 			{
 				System.out.println(status.getText());
+			}
+		}
+		catch(TwitterException twitterException)
+		{
+			twitterException.printStackTrace();
+			System.out.println("Failed : " + twitterException.getMessage());
+		}
+	}
 
-				this.amplifiers(status.getId());
+	public void getAmplifiersStats(long user_id)
+	{
+		try
+		{
+			TimelinesResources timelinesResource = TwitterApi.client().timelines();
+
+			ResponseList<Status> statuses = timelinesResource.getUserTimeline(user_id);
+
+			Map<Long, Integer> amplifiersStats = new HashMap<Long, Integer>();
+
+			for(Status status : statuses)
+			{
+				//System.out.println(status.getText());
+
+				amplifiersStats = this.amplifiers(status.getId(), amplifiersStats);
+			}
+
+			Map<Long, Integer> sortedMap = sortByValue(amplifiersStats);
+
+			for(Map.Entry<Long, Integer> entry : sortedMap.entrySet())
+			{
+				System.out.println(entry.getKey() + " : " + entry.getValue());
 			}
 		}
 		catch(TwitterException twitterException)
@@ -93,12 +128,14 @@ public class TestApp
 
 			do
 			{
-				result = TwitterApi.instance().search(query);
+				result = TwitterApi.client().search(query);
 				List<Status> tweets = result.getTweets();
 
 				for(Status tweet : tweets)
 				{
-					System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
+					//System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
+
+					getAmplifiersStats(tweet.getUser().getId());
 				}
 
 			}
@@ -129,7 +166,7 @@ public class TestApp
 
 			do
 			{
-				result = TwitterApi.instance().search(query);
+				result = TwitterApi.client().search(query);
 				List<Status> tweets = result.getTweets();
 
 				for(Status tweet : tweets)
@@ -147,7 +184,7 @@ public class TestApp
 		}
 	}
 
-	public void amplifiers(long status_id)
+	public Map<Long, Integer> amplifiers(long status_id, Map<Long, Integer> amplifiersStats)
 	{
 
 		IDs ids;
@@ -157,10 +194,15 @@ public class TestApp
 
 			do {
 
-				ids = TwitterApi.instance().tweets().getRetweeterIds(status_id, cursor);
+				ids = TwitterApi.client().tweets().getRetweeterIds(status_id, cursor);
 
 				for (long id : ids.getIDs()) {
-					System.out.println(TwitterApi.instance().users().showUser(id).getScreenName());
+					//System.out.println(TwitterApi.client().users().showUser(id).getScreenName());
+					if(amplifiersStats.containsKey(id)){
+						amplifiersStats.replace(id, amplifiersStats.get(id)+1);
+					}else {
+						amplifiersStats.put(id, 1);
+					}
 				}
 
 			}while ((cursor = ids.getNextCursor()) != 0);
@@ -168,6 +210,8 @@ public class TestApp
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
+
+		return(amplifiersStats);
 	}
 
 	public void userStats(User user, boolean insertInTable){
@@ -188,7 +232,7 @@ public class TestApp
 
 			PreparedStatement preparedStmt = null;
 			try {
-				preparedStmt = TwitterApi.twitterApiInstance().getConnection().prepareStatement(query);
+				preparedStmt = DB.conn().prepareStatement(query);
 
 				preparedStmt.setInt    (1, (int) user.getId());
 				preparedStmt.setInt    (2, user.getStatusesCount());
@@ -213,7 +257,7 @@ public class TestApp
 
 		PreparedStatement preparedStmt = null;
 		try {
-			preparedStmt = TwitterApi.twitterApiInstance().getConnection().prepareStatement(query);
+			preparedStmt = DB.conn().prepareStatement(query);
 
 			preparedStmt.setInt(1, (int) user.getId());
 
@@ -238,6 +282,26 @@ public class TestApp
 
 	}
 
+	private static Map<Long, Integer>sortByValue(Map<Long, Integer> unsortMap) {
+
+		List<Map.Entry<Long, Integer>> list =
+				new LinkedList<Map.Entry<Long, Integer>>(unsortMap.entrySet());
+
+		Collections.sort(list, new Comparator<Map.Entry<Long, Integer>>() {
+			public int compare(Map.Entry<Long, Integer> o1,
+							   Map.Entry<Long, Integer> o2) {
+				return (o2.getValue()).compareTo(o1.getValue());
+			}
+		});
+
+		Map<Long, Integer> sortedMap = new LinkedHashMap<Long, Integer>();
+		for (Map.Entry<Long, Integer> entry : list) {
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+
+		return sortedMap;
+	}
+
 	public static void main(String[] args)
 	{
 		TestApp testApp = new TestApp();
@@ -245,16 +309,7 @@ public class TestApp
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
 
-		TwitterApi.twitterApiInstance().setConnection();
-
-		testApp.findUsers("Kathimerini_gr");
-
-		Connection connection = TwitterApi.twitterApiInstance().getConnection();
-		try {
-			connection.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		testApp.search("Kathimerini_gr");
 
 		System.out.println("all ok");
 	}
