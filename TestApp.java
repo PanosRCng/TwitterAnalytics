@@ -208,10 +208,55 @@ public class TestApp
 			}while ((cursor = ids.getNextCursor()) != 0);
 
 		} catch (TwitterException e) {
+
 			e.printStackTrace();
+
+			String query = " insert into temp (userID, counter, cursorID)"
+					+ " values (?, ?, ?)";
+
+			try {
+
+				PreparedStatement preparedStmt = DB.conn().prepareStatement(query);
+
+				for(Map.Entry<Long, Integer> entry : amplifiersStats.entrySet())
+				{
+
+					System.out.println(entry.getKey() + " : " + entry.getValue());
+
+					preparedStmt.setInt    (1, entry.getKey().intValue());
+					preparedStmt.setInt    (2, entry.getValue());
+					preparedStmt.setInt    (3, (int) cursor);
+
+					preparedStmt.addBatch();
+				}
+
+				// execute the batch
+				int[] updateCounts = preparedStmt.executeBatch();
+
+				checkUpdateCounts(updateCounts);
+
+				// since there were no errors, commit
+				DB.conn().commit();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 		}
 
 		return(amplifiersStats);
+	}
+
+	public static void checkUpdateCounts(int[] updateCounts) {
+		for (int i=0; i<updateCounts.length; i++) {
+			if (updateCounts[i] >= 0) {
+				System.out.println("OK; updateCount="+updateCounts[i]);
+			}
+			else if (updateCounts[i] == Statement.SUCCESS_NO_INFO) {
+				System.out.println("OK; updateCount=Statement.SUCCESS_NO_INFO");
+			}
+			else if (updateCounts[i] == Statement.EXECUTE_FAILED) {
+				System.out.println("Failure; updateCount=Statement.EXECUTE_FAILED");
+			}
+		}
 	}
 
 	public void userStats(User user, boolean insertInTable){
