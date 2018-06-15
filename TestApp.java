@@ -192,29 +192,50 @@ public class TestApp
 
 		try {
 
-			do {
+			String query = "select max(cursorID) as cursorID, count(*) as counter from temp";
 
-				ids = TwitterApi.client().tweets().getRetweeterIds(status_id, cursor);
+			PreparedStatement preparedStmt = null;
 
-				for (long id : ids.getIDs()) {
-					//System.out.println(TwitterApi.client().users().showUser(id).getScreenName());
-					if(amplifiersStats.containsKey(id)){
-						amplifiersStats.replace(id, amplifiersStats.get(id)+1);
-					}else {
-						amplifiersStats.put(id, 1);
-					}
+			try {
+				preparedStmt = DB.conn().prepareStatement(query);
+
+				ResultSet rs = preparedStmt.executeQuery();
+
+				while (rs.next())
+				{
+
+					if(rs.getInt("counter")!=0) cursor = rs.getInt("cursorID") + 1;
+
+					do {
+						ids = TwitterApi.client().tweets().getRetweeterIds(status_id, cursor);
+
+						for (long id : ids.getIDs()) {
+							//System.out.println(TwitterApi.client().users().showUser(id).getScreenName());
+							if(amplifiersStats.containsKey(id)){
+								amplifiersStats.replace(id, amplifiersStats.get(id)+1);
+							}else {
+								amplifiersStats.put(id, 1);
+							}
+						}
+
+					}while ((cursor = ids.getNextCursor()) != 0);
 				}
 
-			}while ((cursor = ids.getNextCursor()) != 0);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 
 		} catch (TwitterException e) {
 
 			e.printStackTrace();
 
-			String query = " insert into temp (userID, counter, cursorID)"
-					+ " values (?, ?, ?)";
+			String query = " insert into temp (userID, counter, statusID, cursorID)"
+					+ " values (?, ?, ?, ?)";
 
 			try {
+
+				System.out.println("psit1");
+				DB.conn().setAutoCommit(false);
 
 				PreparedStatement preparedStmt = DB.conn().prepareStatement(query);
 
@@ -223,20 +244,22 @@ public class TestApp
 
 					System.out.println(entry.getKey() + " : " + entry.getValue());
 
-					preparedStmt.setInt    (1, entry.getKey().intValue());
+					preparedStmt.setLong    (1, entry.getKey());
 					preparedStmt.setInt    (2, entry.getValue());
-					preparedStmt.setInt    (3, (int) cursor);
+					preparedStmt.setLong    (3, status_id);
+					preparedStmt.setInt    (4, (int) cursor);
 
 					preparedStmt.addBatch();
 				}
-
+				System.out.println("psit2");
 				// execute the batch
 				int[] updateCounts = preparedStmt.executeBatch();
 
 				checkUpdateCounts(updateCounts);
-
+				System.out.println("psit3");
 				// since there were no errors, commit
 				DB.conn().commit();
+				System.out.println("psit4");
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
