@@ -1,0 +1,7 @@
+{
+  "DATABASE_SERVER" : "localhost",
+  "DATABASE_PORT" : 3306,
+  "DATABASE_NAME" : "twitter",
+  "DATABASE_USER" : "stathis",
+  "DATABASE_PASSWORD" : "twitter@Analytics"
+}
