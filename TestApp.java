@@ -3,8 +3,8 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
 
-import TwitterAnalytics.ConfigManager.Config;
-import TwitterAnalytics.DB;
+import TwitterAnalytics.Models.Trend;
+import TwitterAnalytics.Models.Tweet;
 import twitter4j.RateLimitStatus;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -18,10 +18,6 @@ import twitter4j.User;
 import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
 import twitter4j.Trends;
-import twitter4j.Trend;
-
-import java.sql.Statement;
-import java.sql.ResultSet;
 
 
 public class TestApp
@@ -122,7 +118,7 @@ public class TestApp
 	}
 
 
-	public void search(String query_string, int max_results)
+	public void search(int trend_id, String query_string, int max_results)
 	{
 		try
 		{
@@ -148,9 +144,9 @@ public class TestApp
 
 					tweet_counter++;
 
-					System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
+					Tweet tweetC = new Tweet(tweet.getText(), tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+					tweetC.save();
 				}
-
 			}
 			while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
 
@@ -164,14 +160,14 @@ public class TestApp
 	}
 
 
-	public List<Trend> getTopTrends(int woeid, int top)
+	public List<twitter4j.Trend> getTopTrends(int woeid, int top)
 	{
 		try
 		{
 			TrendsResources trendsResources = TwitterApi.client().trends();
 
 			Trends trends = trendsResources.getPlaceTrends(woeid);
-			Trend[] trendsArray = trends.getTrends();
+			twitter4j.Trend[] trendsArray = trends.getTrends();
 
 			return Arrays.asList(trendsArray).subList(0, 10);
 		}
@@ -187,13 +183,14 @@ public class TestApp
 
 	public void getTrends(int woeid)
 	{
-		List<Trend> top10trends = this.getTopTrends(woeid, 10);
+		List<twitter4j.Trend> top10trends = this.getTopTrends(woeid, 10);
 
-		for(Trend trend : top10trends)
+		for(twitter4j.Trend trend : top10trends)
 		{
-			System.out.println("name: " + trend.getName() + ", query: " + trend.getQuery() + ", url: " + trend.getURL());
+			Trend trendC = new Trend(trend.getName(), trend.getQuery());
+			int inserted_id = trendC.save();
 
-			this.search( trend.getQuery(), 100 );
+			this.search(inserted_id, trend.getQuery(), 10 );
 		}
 	}
 
@@ -206,27 +203,47 @@ public class TestApp
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
-		//testApp.getTrends(23424833);
+		testApp.getTrends(23424833);
 
 
-		try
-		{
-			Statement stmt = DB.conn().createStatement();
-			ResultSet rs;
+		/*
+		// Create
+		Trend trendC = new Trend("trend5", "query5");
+		int inserted_id = trendC.save();
 
-			rs = stmt.executeQuery("select * from test");
+		// Retrieve
+		Trend trendR = (Trend) new Trend().get( trendC.entry_id );
+		System.out.println(trendR.entry_id);
+		System.out.println(trendR.name);
+		System.out.println(trendR.query);
+		System.out.println(trendR.created_at);
+		System.out.println(trendR.updated_at);
 
-			while(rs.next())
-			{
-				String lastName = rs.getString("value");
-				System.out.println(lastName);
-			}
-		}
-		catch(Exception ex)
-		{
+		// Update
+		trendR.name = "trend6";
+		trendR.query = "query6";
+		trendR.save();
 
-		}
+		// Delete
+		trendR.delete();
+		*/
 
+
+		/*
+		// Retrieve
+		Tweet tweetR = (Tweet) new Tweet().get( 6 );
+		System.out.println(tweetR.text);
+		System.out.println(tweetR.timestamp);
+
+
+		// Update
+		tweetR.text = "sdfdsfsdf";
+		tweetR.save();
+
+
+		// Delete
+		tweetR.delete();
+		*/
 
 		System.out.println("all ok");
 	}
