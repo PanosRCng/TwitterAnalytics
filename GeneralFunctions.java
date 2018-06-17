@@ -41,18 +41,46 @@ public class GeneralFunctions {
         }
     }
 
-    public void checkRateLimit()
+    public boolean checkRateLimit()
     {
+
+        boolean flag = false;
         try
         {
 
-            RateLimitStatus status = TwitterApi.client().getRateLimitStatus().get("/application/rate_limit_status");
+            //RateLimitStatus status = TwitterApi.client().getRateLimitStatus().get("/application/rate_limit_status");
 
-            int secondsUntilReset = status.getSecondsUntilReset();
+            //int secondsUntilReset = status.getSecondsUntilReset();
 
-            if(secondsUntilReset>0 & secondsUntilReset<=899) {
-                System.out.println("Sorry dude no remaining rate limit. Try again in "+secondsUntilReset+" seconds");
-                System.exit(0);
+           // if(secondsUntilReset>0 & secondsUntilReset<=899) {
+               // System.out.println("Sorry dude no remaining rate limit. Try again in "+secondsUntilReset+" seconds");
+               // System.exit(0);
+           // }
+
+            Map<String ,RateLimitStatus> rateLimit = TwitterApi.client().getRateLimitStatus();
+
+            for (String timeStatus : rateLimit.keySet()) {
+
+                RateLimitStatus timeLeft = rateLimit.get(timeStatus);
+
+                if (timeLeft != null && timeLeft.getRemaining() == 0) {
+
+                    //Make Thread sleep for 15Minutes
+
+                    System.err.println("Rate limit exceeded!!!");
+
+                    flag = true;
+
+                    //System.exit(0);
+
+                   // Thread.sleep(900000);
+
+                    //System.out.println("Continue after sleep!!!");
+
+                }
+
+
+
             }
 
         }
@@ -61,6 +89,8 @@ public class GeneralFunctions {
             twitterException.printStackTrace();
             System.out.println("Failed : " + twitterException.getMessage());
         }
+
+        return(flag);
     }
 
 

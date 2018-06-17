@@ -27,6 +27,37 @@ public class TestApp
 
 		GeneralFunctions generalFunctions = new GeneralFunctions();
 
+		int status_counter = 0;
+		int amplifiers_counter = 0;
+
+		String query_temp = "select * from temp";
+
+		PreparedStatement preparedStmt = null;
+
+		try {
+			preparedStmt = DB.conn().prepareStatement(query_temp);
+
+			ResultSet rs = preparedStmt.executeQuery();
+
+			boolean checkDB = rs.next();
+			System.out.println(checkDB);
+
+			if(checkDB){
+
+				{
+					amplifiersStats.put(rs.getLong("userID"), rs.getInt("counter"));
+
+					System.out.println("cursor : "+(int)cursor);
+					System.out.println("cursor in database: "+rs.getInt("cursorID"));
+					System.out.println("cursor in database plus 1: "+(rs.getInt("cursorID")+1));
+					cursor = (long) max((int)cursor,rs.getInt("cursorID")+1);
+				}while (rs.next());
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 		try
 		{
 			Query query = new Query(query_string);
@@ -37,37 +68,13 @@ public class TestApp
 				result = TwitterApi.client().search(query);
 				List<Status> tweets = result.getTweets();
 
-				String query_temp = "select * from temp";
-
-				PreparedStatement preparedStmt = null;
-
-				try {
-					preparedStmt = DB.conn().prepareStatement(query_temp);
-
-					ResultSet rs = preparedStmt.executeQuery();
-
-					boolean yolo = rs.next();
-					System.out.println(yolo);
-
-					if(yolo){
-
-						while (rs.next())
-						{
-							amplifiersStats.put(rs.getLong("userID"), rs.getInt("counter"));
-
-							cursor = max(cursor,rs.getInt("cursorID"));
-						}
-
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
 				for(Status tweet : tweets)
 				{
 					//System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
-					System.out.println(tweet.getId());
+
 					//getAmplifiersStats(tweet.getUser().getId());
+
+					status_counter++;
 
 					do {
 
@@ -76,7 +83,8 @@ public class TestApp
 						ids = TwitterApi.client().tweets().getRetweeterIds(status_id, cursor);
 
 						for (long id : ids.getIDs()) {
-							//System.out.println(TwitterApi.client().users().showUser(id).getScreenName());
+							amplifiers_counter++;
+							System.out.println(TwitterApi.client().users().showUser(id).getId());
 							if(amplifiersStats.containsKey(id)){
 								amplifiersStats.replace(id, amplifiersStats.get(id)+1);
 							}else {
@@ -100,6 +108,11 @@ public class TestApp
 		}
 		catch(TwitterException te)
 		{
+
+			System.out.println("Status counter : "+status_counter);
+			System.out.println("Amplifiers counter : "+amplifiers_counter);
+			System.out.println("Cursor : "+(int)cursor);
+
 			te.printStackTrace();
 			System.out.println("Failed to search tweets: " + te.getMessage());
 
@@ -108,14 +121,16 @@ public class TestApp
 
 			try {
 
+				DB.conn().createStatement().executeUpdate("truncate temp");
+
 				DB.conn().setAutoCommit(false);
 
-				PreparedStatement preparedStmt = DB.conn().prepareStatement(query);
+				preparedStmt = DB.conn().prepareStatement(query);
 
 				for(Map.Entry<Long, Integer> entry : amplifiersStats.entrySet())
 				{
 
-					System.out.println(entry.getKey() + " : " + entry.getValue());
+					//System.out.println(entry.getKey() + " : " + entry.getValue());
 
 					preparedStmt.setLong    (1, entry.getKey());
 					preparedStmt.setInt    (2, entry.getValue());
@@ -178,15 +193,29 @@ public class TestApp
 	{
 		TestApp testApp = new TestApp();
 
-		GeneralFunctions generalFunctions = new GeneralFunctions();
-		generalFunctions.checkRateLimit();
+		while(true){
+			GeneralFunctions generalFunctions = new GeneralFunctions();
+			boolean checkLimit = generalFunctions.checkRateLimit();
+
+			if(checkLimit) {
+				try {
+					Thread.sleep(900000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			testApp.search("olympiacosbc");
+
+			System.out.println("all ok");
+
+		}
+
 
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
 
-		testApp.search("Kathimerini_gr");
 
-		System.out.println("all ok");
 	}
 
 }
