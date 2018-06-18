@@ -1,7 +1,4 @@
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.Tweet;
@@ -18,6 +15,9 @@ import twitter4j.User;
 import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
 import twitter4j.Trends;
+
+import java.sql.Timestamp;
+
 
 
 public class TestApp
@@ -219,6 +219,7 @@ public class TestApp
 		System.out.println(trendR.created_at);
 		System.out.println(trendR.updated_at);
 
+
 		// Update
 		trendR.name = "trend6";
 		trendR.query = "query6";
@@ -230,8 +231,12 @@ public class TestApp
 
 
 		/*
+		// Create
+		Tweet tweetC =new Tweet("test", 5, 100, new Timestamp(111111));
+		tweetC.save();
+
 		// Retrieve
-		Tweet tweetR = (Tweet) new Tweet().get( 6 );
+		Tweet tweetR = (Tweet) new Tweet().get( tweetC.entry_id );
 		System.out.println(tweetR.text);
 		System.out.println(tweetR.timestamp);
 

@@ -5,9 +5,6 @@ public class Trend extends DBModel
 {
 
     public String table = "trends";
-    public int entry_id;
-    public String created_at;
-    public String updated_at;
 
     public boolean timestamps = true;
 

@@ -13,6 +13,11 @@ import java.text.SimpleDateFormat;
 class DBModel
 {
 
+    public int entry_id;
+    public String created_at;
+    public String updated_at;
+
+
 
     public DBModel get(int entry_id)
     {
@@ -52,6 +57,7 @@ class DBModel
             if( this.entry_id() == 0  )
             {
                 int inserted_id = DB.insert( this.create_query() );
+
                 this.setValue(this.fields().get("entry_id"), inserted_id);
                 return inserted_id;
             }
@@ -273,7 +279,7 @@ class DBModel
 
         try
         {
-            for(Field field : this.getClass().getDeclaredFields())
+            for(Field field : this.getClass().getFields())
             {
                 fields.put(field.getName(), field);
             }
@@ -293,7 +299,7 @@ class DBModel
 
         try
         {
-            for(Field field : this.getClass().getDeclaredFields())
+            for(Field field : this.getClass().getFields())
             {
                 String name = field.getName();
 
@@ -317,9 +323,9 @@ class DBModel
                     continue;
                 }
 
-
                 fields.put(name, field);
             }
+
         }
         catch(Exception ex)
         {

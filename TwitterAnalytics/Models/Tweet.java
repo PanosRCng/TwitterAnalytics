@@ -8,10 +8,7 @@ public class Tweet extends DBModel
 {
 
     public String table = "tweets";
-    public int entry_id;
 
-    public String created_at;
-    public String updated_at;
     public boolean timestamps = false;
 
 
