@@ -1,10 +1,10 @@
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import twitter4j.*;
 
 import TwitterAnalytics.TwitterApi;
@@ -19,11 +19,12 @@ public class TestApp
 	public void search(String query_string)
 	{
 
-		Map<Long, Integer> amplifiersStats = new HashMap<Long, Integer>();
+		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
+		Map<Long, Date> statusDate = new HashMap<Long, Date>();
 
 		IDs ids;
 		long cursor = -1;
-		long status_id = -1;
+		long pageID = -1;
 
 		GeneralFunctions generalFunctions = new GeneralFunctions();
 
@@ -44,13 +45,14 @@ public class TestApp
 
 			if(checkDB){
 
-				{
-					amplifiersStats.put(rs.getLong("userID"), rs.getInt("counter"));
-
-					System.out.println("cursor : "+(int)cursor);
-					System.out.println("cursor in database: "+rs.getInt("cursorID"));
-					System.out.println("cursor in database plus 1: "+(rs.getInt("cursorID")+1));
-					cursor = (long) max((int)cursor,rs.getInt("cursorID")+1);
+				do {
+					amplifiers.put(rs.getLong("userID"), rs.getLong("statusID"));
+					statusDate.put(rs.getLong("statusID"), rs.getDate("date"));
+					System.out.println("Me exei nevriasei : "+rs.getLong("userID")+" / "+ amplifiers.get(rs.getLong("userID")));
+					System.out.println("cursor : "+ cursor);
+					System.out.println("cursor in database: "+rs.getLong("cursorID"));
+					cursor = max(cursor,rs.getLong("cursorID"));
+					System.out.println("cursor used: "+cursor);
 				}while (rs.next());
 
 			}
@@ -74,22 +76,27 @@ public class TestApp
 
 					//getAmplifiersStats(tweet.getUser().getId());
 
+					pageID = tweet.getUser().getId();
+
 					status_counter++;
 
 					do {
 
-						status_id = tweet.getId();
+						System.out.println("Cursor given : "+cursor);
 
-						ids = TwitterApi.client().tweets().getRetweeterIds(status_id, cursor);
+						ids = TwitterApi.client().tweets().getRetweeterIds(tweet.getId(), cursor);
 
 						for (long id : ids.getIDs()) {
 							amplifiers_counter++;
 							System.out.println(TwitterApi.client().users().showUser(id).getId());
-							if(amplifiersStats.containsKey(id)){
-								amplifiersStats.replace(id, amplifiersStats.get(id)+1);
-							}else {
-								amplifiersStats.put(id, 1);
+							if(!amplifiers.containsEntry(id,tweet.getId())){
+								amplifiers.put(id,tweet.getId());
 							}
+							if(!statusDate.containsKey(tweet.getId())){
+								statusDate.put(tweet.getId(), tweet.getCreatedAt());
+							}
+							System.out.println(id+"........"+amplifiers.get(id));
+							System.out.println("Cursor in loops : "+cursor);
 						}
 
 					}while ((cursor = ids.getNextCursor()) != 0);
@@ -99,25 +106,25 @@ public class TestApp
 			}
 			while( (query = result.nextQuery()) != null );
 
-			Map<Long, Integer> sortedMap = generalFunctions.sortByValue(amplifiersStats);
+			//Map<Long, Integer> sortedMap = generalFunctions.sortByValue(amplifiers);
 
-			for(Map.Entry<Long, Integer> entry : sortedMap.entrySet())
-			{
-				System.out.println(entry.getKey() + " : " + entry.getValue());
-			}
+			//for(Map.Entry<Long, Integer> entry : sortedMap.entrySet())
+			//{
+				//System.out.println(entry.getKey() + " : " + entry.getValue());
+			//}
 		}
 		catch(TwitterException te)
 		{
 
 			System.out.println("Status counter : "+status_counter);
 			System.out.println("Amplifiers counter : "+amplifiers_counter);
-			System.out.println("Cursor : "+(int)cursor);
+			System.out.println("Cursor : "+cursor);
 
 			te.printStackTrace();
 			System.out.println("Failed to search tweets: " + te.getMessage());
 
-			String query = " insert into temp (userID, counter, statusID, cursorID)"
-					+ " values (?, ?, ?, ?)";
+			String query = " insert into temp (userID, statusID, pageID, date, cursorID)"
+					+ " values (?, ?, ?, ?, ?)";
 
 			try {
 
@@ -127,17 +134,25 @@ public class TestApp
 
 				preparedStmt = DB.conn().prepareStatement(query);
 
-				for(Map.Entry<Long, Integer> entry : amplifiersStats.entrySet())
+				for(Long key : amplifiers.keySet())
 				{
 
 					//System.out.println(entry.getKey() + " : " + entry.getValue());
 
-					preparedStmt.setLong    (1, entry.getKey());
-					preparedStmt.setInt    (2, entry.getValue());
-					preparedStmt.setLong    (3, status_id);
-					preparedStmt.setInt    (4, (int) cursor);
+					Collection<Long> values = amplifiers.get(key);
 
-					preparedStmt.addBatch();
+					for(Long value : values){
+
+						preparedStmt.setLong    (1, key);
+						preparedStmt.setLong    (2, value);
+						preparedStmt.setLong    (3, pageID);
+						preparedStmt.setDate    (4, new java.sql.Date(statusDate.get(value).getTime()));
+						preparedStmt.setLong    (5, cursor);
+
+						preparedStmt.addBatch();
+
+					}
+
 				}
 
 				// execute the batch
