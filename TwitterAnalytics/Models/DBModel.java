@@ -4,8 +4,7 @@ package TwitterAnalytics.Models;
 import TwitterAnalytics.DB;
 
 import java.lang.reflect.Field;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
@@ -56,20 +55,20 @@ class DBModel
         {
             if( this.entry_id() == 0  )
             {
-                int inserted_id = DB.insert( this.create_query() );
+                int inserted_id = DB.insert( this.insertStatement(this.create_query()) );
 
                 this.setValue(this.fields().get("entry_id"), inserted_id);
                 return inserted_id;
             }
 
-            if( DB.update(this.update_query()) )
+            if( DB.update( this.updateStatement(this.update_query()) ) )
             {
                 return this.entry_id();
             }
         }
         catch(Exception ex)
         {
-            System.out.println(ex);
+            System.out.println(ex.getMessage());
         }
 
         return -1;
@@ -121,8 +120,7 @@ class DBModel
                     continue;
                 }
 
-                sb.append(this.getValue(entry.getValue()));
-                sb.append(", ");
+                sb.append("?, ");
             }
 
             if( this.timestamps() )
@@ -142,6 +140,35 @@ class DBModel
         }
 
         return query;
+    }
+
+
+    protected PreparedStatement insertStatement(String query)
+    {
+        try
+        {
+            PreparedStatement preStmt = DB.conn().prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            int index = 1;
+
+            for(HashMap.Entry<String, Field> entry : this.atrribute_fields().entrySet())
+            {
+                if(entry.getKey().equals("entry_id"))
+                {
+                    continue;
+                }
+
+                this.getStatementValue(preStmt, index++, entry.getValue());
+            }
+
+            return preStmt;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -198,7 +225,8 @@ class DBModel
                     continue;
                 }
 
-                sb.append(name + "=" + this.getValue(field) + ", ");
+                //sb.append(name + "=" + this.getValue(field) + ", ");
+                sb.append(name + "=?, ");
             }
 
             if( this.timestamps() )
@@ -215,6 +243,35 @@ class DBModel
         }
 
         return query;
+    }
+
+
+    protected PreparedStatement updateStatement(String query)
+    {
+        try
+        {
+            PreparedStatement preStmt = DB.conn().prepareStatement(query);
+
+            int index = 1;
+
+            for(HashMap.Entry<String, Field> entry : this.atrribute_fields().entrySet())
+            {
+                if(entry.getKey().equals("entry_id"))
+                {
+                    continue;
+                }
+
+                this.getStatementValue(preStmt, index++, entry.getValue());
+            }
+
+            return preStmt;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -250,6 +307,41 @@ class DBModel
             }
 
             return field.get(this);
+        }
+        catch(Exception ex)
+        {
+
+        }
+
+        return null;
+    }
+
+
+    private PreparedStatement getStatementValue(PreparedStatement preStmt, int index, Field field)
+    {
+        try
+        {
+            if(field.getType() == String.class)
+            {
+                preStmt.setString(index, field.get(this).toString());
+            }
+
+            if(field.getType() == Timestamp.class)
+            {
+                preStmt.setString(index, field.get(this).toString());
+            }
+
+            if(field.getType() == int.class)
+            {
+                preStmt.setInt(index, (int)field.get(this));
+            }
+
+            if(field.getType() == long.class)
+            {
+                preStmt.setLong(index, (long)field.get(this));
+            }
+
+            return preStmt;
         }
         catch(Exception ex)
         {

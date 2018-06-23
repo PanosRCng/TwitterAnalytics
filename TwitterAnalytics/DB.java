@@ -1,11 +1,7 @@
 package TwitterAnalytics;
 
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
 
 import TwitterAnalytics.ConfigManager.Config;
 
@@ -94,11 +90,53 @@ public class DB
     }
 
 
+    public static int insert(PreparedStatement stmt)
+    {
+        try
+        {
+            stmt.executeUpdate();
+
+            ResultSet resultSet = stmt.getGeneratedKeys();
+
+            if(resultSet.next())
+            {
+                return resultSet.getInt(1);
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return -1;
+    }
+
+
     public static boolean update(String query)
     {
         try
         {
             int affected_rows = DB.conn().createStatement().executeUpdate(query);
+
+            if(affected_rows == 1)
+            {
+                return true;
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return false;
+    }
+
+
+    public static boolean update(PreparedStatement stmt)
+    {
+        try
+        {
+            int affected_rows = stmt.executeUpdate();
 
             if(affected_rows == 1)
             {
