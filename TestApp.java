@@ -1,5 +1,6 @@
 import java.util.*;
 
+import TwitterAnalytics.Models.DBModel;
 import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.Tweet;
 import twitter4j.RateLimitStatus;
@@ -22,25 +23,6 @@ import java.sql.Timestamp;
 
 public class TestApp
 {
-
-	public void showRateLimits()
-	{
-		try
-		{
-			Map<String, RateLimitStatus> limits = TwitterApi.client().getRateLimitStatus();
-
-			for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
-			{
-				System.out.println(entry.getKey() + " : " + entry.getValue());
-			}
-		}
-		catch(TwitterException twitterException)
-		{
-			twitterException.printStackTrace();
-			System.out.println("Failed : " + twitterException.getMessage());
-		}
-	}
-
 
 	public void findUsers(String search_string)
 	{
@@ -160,95 +142,18 @@ public class TestApp
 	}
 
 
-	public List<twitter4j.Trend> getTopTrends(int woeid, int top)
-	{
-		try
-		{
-			TrendsResources trendsResources = TwitterApi.client().trends();
-
-			Trends trends = trendsResources.getPlaceTrends(woeid);
-			twitter4j.Trend[] trendsArray = trends.getTrends();
-
-			return Arrays.asList(trendsArray).subList(0, 10);
-		}
-		catch(TwitterException te)
-		{
-			te.printStackTrace();
-			System.out.println("Failed to find trends: " + te.getMessage());
-		}
-
-		return Collections.emptyList();
-	}
-
-
-	public void getTrends(int woeid)
-	{
-		List<twitter4j.Trend> top10trends = this.getTopTrends(woeid, 10);
-
-		for(twitter4j.Trend trend : top10trends)
-		{
-			Trend trendC = new Trend(trend.getName(), trend.getQuery());
-			int inserted_id = trendC.save();
-
-			this.search(inserted_id, trend.getQuery(), 10 );
-		}
-	}
-
-
 
 	public static void main(String[] args)
 	{
-		TestApp testApp = new TestApp();
-
+		//TestApp testApp = new TestApp();
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
-		testApp.getTrends(23424833);
 
+		//TestApp2 testApp2 = new TestApp2();
 
-		/*
-		// Create
-		Trend trendC = new Trend("trend5", "query5");
-		int inserted_id = trendC.save();
+		TrendsApp trendsApp = new TrendsApp();
 
-		// Retrieve
-		Trend trendR = (Trend) new Trend().get( trendC.entry_id );
-		System.out.println(trendR.entry_id);
-		System.out.println(trendR.name);
-		System.out.println(trendR.query);
-		System.out.println(trendR.created_at);
-		System.out.println(trendR.updated_at);
-
-
-		// Update
-		trendR.name = "trend6";
-		trendR.query = "query6";
-		trendR.save();
-
-		// Delete
-		trendR.delete();
-		*/
-
-
-		/*
-		// Create
-		Tweet tweetC =new Tweet("test", 5, 100, new Timestamp(111111));
-		tweetC.save();
-
-		// Retrieve
-		Tweet tweetR = (Tweet) new Tweet().get( tweetC.entry_id );
-		System.out.println(tweetR.text);
-		System.out.println(tweetR.timestamp);
-
-
-		// Update
-		tweetR.text = "sdfdsfsdf";
-		tweetR.save();
-
-
-		// Delete
-		tweetR.delete();
-		*/
 
 		System.out.println("all ok");
 	}

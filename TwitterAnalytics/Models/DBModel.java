@@ -5,17 +5,72 @@ import TwitterAnalytics.DB;
 
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
 
-class DBModel
+public class DBModel
 {
 
     public int entry_id;
     public String created_at;
     public String updated_at;
 
+
+
+    public ArrayList<DBModel> all_ids()
+    {
+        ArrayList<DBModel> models = new ArrayList<>();
+
+        try
+        {
+            ResultSet resultSet = DB.query( this.retrieve_all_query() );
+
+            do
+            {
+                DBModel obj = new DBModel();
+
+                setValue(obj, obj.fields().get("entry_id"), resultSet.getObject("entry_id"));
+
+                models.add(obj);
+            }
+            while(resultSet.next());
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+
+        return models;
+    }
+
+
+    public ArrayList<DBModel> all_ids(String where)
+    {
+        ArrayList<DBModel> models = new ArrayList<>();
+
+        try
+        {
+            ResultSet resultSet = DB.query( this.retrieve_all_query(where) );
+
+            do
+            {
+                DBModel obj = new DBModel();
+
+                setValue(obj, obj.fields().get("entry_id"), resultSet.getObject("entry_id"));
+
+                models.add(obj);
+            }
+            while(resultSet.next());
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+        }
+
+        return models;
+    }
 
 
     public DBModel get(int entry_id)
@@ -29,13 +84,13 @@ class DBModel
                 String name = entry.getKey();
                 Field field = entry.getValue();
 
-                setValue(field, resultSet.getObject(name));
+                setValue(this, field, resultSet.getObject(name));
             }
 
             if( this.timestamps() )
             {
-                setValue(this.fields().get("created_at"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultSet.getObject("created_at")));
-                setValue(this.fields().get("updated_at"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultSet.getObject("updated_at")));
+                setValue(this, this.fields().get("created_at"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultSet.getObject("created_at")));
+                setValue(this,this.fields().get("updated_at"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(resultSet.getObject("updated_at")));
             }
 
             return this;
@@ -57,7 +112,7 @@ class DBModel
             {
                 int inserted_id = DB.insert( this.insertStatement(this.create_query()) );
 
-                this.setValue(this.fields().get("entry_id"), inserted_id);
+                this.setValue(this, this.fields().get("entry_id"), inserted_id);
                 return inserted_id;
             }
 
@@ -203,6 +258,18 @@ class DBModel
         }
 
         return query;
+    }
+
+
+    protected String retrieve_all_query()
+    {
+        return "select entry_id from " + this.table_name();
+    }
+
+
+    protected String retrieve_all_query(String where_condition)
+    {
+        return "select entry_id from " + this.table_name() + " where " + where_condition;
     }
 
 
@@ -352,11 +419,11 @@ class DBModel
     }
 
 
-    private void setValue(Field field, Object value)
+    private void setValue(Object obj, Field field, Object value)
     {
         try
         {
-            field.set(this, value);
+            field.set(obj, value);
         }
         catch(Exception ex)
         {

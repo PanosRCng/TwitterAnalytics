@@ -2,10 +2,13 @@ package TwitterAnalytics;
 
 
 import TwitterAnalytics.ConfigManager.Config;
+import twitter4j.RateLimitStatus;
+import twitter4j.TwitterException;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.TwitterFactory;
 import twitter4j.Twitter;
 
+import java.util.Map;
 
 
 public class TwitterApi
@@ -41,5 +44,52 @@ public class TwitterApi
         return SingletonHelper.INSTANCE.twitter;
     }
 
+
+    public static void showRateLimits()
+    {
+        try
+        {
+            Map<String, RateLimitStatus> limits = TwitterApi.client().getRateLimitStatus();
+
+            for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
+            {
+                System.out.println(entry.getKey() + " : " + entry.getValue());
+            }
+        }
+        catch(TwitterException twitterException)
+        {
+            twitterException.printStackTrace();
+            System.out.println("Failed : " + twitterException.getMessage());
+        }
+    }
+
+
+    public static boolean rateLimitsExided()
+    {
+        try
+        {
+            Map<String ,RateLimitStatus> rateLimit = TwitterApi.client().getRateLimitStatus();
+
+            for(String timeStatus : rateLimit.keySet())
+            {
+                RateLimitStatus timeLeft = rateLimit.get(timeStatus);
+
+                if(timeLeft != null && timeLeft.getRemaining() == 0)
+                {
+                    System.err.println("Rate limit exceeded!!!");
+
+                    return true;
+                }
+            }
+
+        }
+        catch(TwitterException twitterException)
+        {
+            twitterException.printStackTrace();
+            System.out.println("Failed : " + twitterException.getMessage());
+        }
+
+        return false;
+    }
 
 }
