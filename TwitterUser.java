@@ -1,12 +1,14 @@
 import TwitterAnalytics.DB;
 import TwitterAnalytics.TwitterApi;
-import twitter4j.ResponseList;
-import twitter4j.Status;
-import twitter4j.TwitterException;
-import twitter4j.User;
+import twitter4j.*;
 import twitter4j.api.TimelinesResources;
 import twitter4j.api.UsersResources;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +17,7 @@ import java.util.Date;
 
 public class TwitterUser {
 
-    public void findUsers(String search_string)
+    public void findUsers(long userID)
     {
 
         TwitterUser twitterUser = new TwitterUser();
@@ -24,7 +26,7 @@ public class TwitterUser {
         {
             UsersResources userResource = TwitterApi.client().users();
 
-            ResponseList<User> users = userResource.lookupUsers(search_string);
+            ResponseList<User> users = userResource.lookupUsers(userID);
 
             for(User user : users)
             {
@@ -155,6 +157,63 @@ public class TwitterUser {
                 e.printStackTrace();
             }
 
+        }
+
+    }
+
+    public void printGraphUserTweets(long userID){
+
+        String stringUrl = "http://localhost:8888/userTweetGraphEdges/users?id="+userID;
+
+        URL url;
+        TwitterUser twitterUser = new TwitterUser();
+
+        try {
+            url = new URL(stringUrl);
+            URLConnection uc;
+            uc = url.openConnection();
+
+            uc.setRequestProperty("X-Requested-With", "Curl");
+
+            String userpass = "admin" + ":" + "admin";
+            String basicAuth = "Basic " + new String(userpass.getBytes());
+            uc.setRequestProperty("Authorization", basicAuth);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+
+            JSONObject obj;
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+
+                String[] splited = line.replaceAll("\\p{P}","").split("\\s+");
+
+                for(String tweet : splited){
+
+                    try {
+                        ResponseList<Status> tweets = TwitterApi.client().tweets().lookup(Long.parseLong(tweet));
+
+                        for(Status tweetUser : tweets){
+                            System.out.println(tweetUser.getText());
+                        }
+                    } catch (TwitterException e) {
+                        e.printStackTrace();
+                    }
+                }
+//                try {
+//                    obj = new JSONObject(line);
+//                    long id_str = Long.parseLong(obj.getString("id_str"));
+//                    System.out.println(id_str);
+//                    twitterUser.findUsers(id_str);
+//                    int cnt = Integer.parseInt(obj.getString("cnt"));
+//                    System.out.println("Count: "+cnt);
+//                } catch (JSONException e) {
+//                    //e.printStackTrace();
+//                }
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

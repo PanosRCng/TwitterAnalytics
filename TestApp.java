@@ -10,9 +10,6 @@ import twitter4j.*;
 import TwitterAnalytics.TwitterApi;
 import TwitterAnalytics.DB;
 
-import static java.lang.Math.max;
-
-
 public class TestApp
 {
 
@@ -28,9 +25,6 @@ public class TestApp
 
 		GeneralFunctions generalFunctions = new GeneralFunctions();
 
-		int status_counter = 0;
-		int amplifiers_counter = 0;
-
 		String query_temp = "select * from temp";
 
 		PreparedStatement preparedStmt = null;
@@ -41,18 +35,12 @@ public class TestApp
 			ResultSet rs = preparedStmt.executeQuery();
 
 			boolean checkDB = rs.next();
-			System.out.println(checkDB);
 
 			if(checkDB){
 
 				do {
 					amplifiers.put(rs.getLong("userID"), rs.getLong("statusID"));
 					statusDate.put(rs.getLong("statusID"), rs.getDate("date"));
-					System.out.println("Me exei nevriasei : "+rs.getLong("userID")+" / "+ amplifiers.get(rs.getLong("userID")));
-					System.out.println("cursor : "+ cursor);
-					System.out.println("cursor in database: "+rs.getLong("cursorID"));
-					cursor = max(cursor,rs.getLong("cursorID"));
-					System.out.println("cursor used: "+cursor);
 				}while (rs.next());
 
 			}
@@ -78,25 +66,19 @@ public class TestApp
 
 					pageID = tweet.getUser().getId();
 
-					status_counter++;
-
 					do {
-
-						System.out.println("Cursor given : "+cursor);
 
 						ids = TwitterApi.client().tweets().getRetweeterIds(tweet.getId(), cursor);
 
 						for (long id : ids.getIDs()) {
-							amplifiers_counter++;
-							System.out.println(TwitterApi.client().users().showUser(id).getId());
+
 							if(!amplifiers.containsEntry(id,tweet.getId())){
 								amplifiers.put(id,tweet.getId());
 							}
 							if(!statusDate.containsKey(tweet.getId())){
 								statusDate.put(tweet.getId(), tweet.getCreatedAt());
 							}
-							System.out.println(id+"........"+amplifiers.get(id));
-							System.out.println("Cursor in loops : "+cursor);
+
 						}
 
 					}while ((cursor = ids.getNextCursor()) != 0);
@@ -116,15 +98,11 @@ public class TestApp
 		catch(TwitterException te)
 		{
 
-			System.out.println("Status counter : "+status_counter);
-			System.out.println("Amplifiers counter : "+amplifiers_counter);
-			System.out.println("Cursor : "+cursor);
-
 			te.printStackTrace();
 			System.out.println("Failed to search tweets: " + te.getMessage());
 
-			String query = " insert into temp (userID, statusID, pageID, date, cursorID)"
-					+ " values (?, ?, ?, ?, ?)";
+			String query = " insert into temp (userID, statusID, pageID, date)"
+					+ " values (?, ?, ?, ?)";
 
 			try {
 
@@ -147,7 +125,6 @@ public class TestApp
 						preparedStmt.setLong    (2, value);
 						preparedStmt.setLong    (3, pageID);
 						preparedStmt.setDate    (4, new java.sql.Date(statusDate.get(value).getTime()));
-						preparedStmt.setLong    (5, cursor);
 
 						preparedStmt.addBatch();
 
@@ -207,30 +184,33 @@ public class TestApp
 	public static void main(String[] args)
 	{
 		TestApp testApp = new TestApp();
+		GeneralFunctions generalFunctions = new GeneralFunctions();
 
-		while(true){
-			GeneralFunctions generalFunctions = new GeneralFunctions();
-			boolean checkLimit = generalFunctions.checkRateLimit();
-
-			if(checkLimit) {
-				try {
-					Thread.sleep(900000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-			testApp.search("olympiacosbc");
-
-			System.out.println("all ok");
-
-		}
+//		while(true){
+//			GeneralFunctions generalFunctions = new GeneralFunctions();
+//			boolean checkLimit = generalFunctions.checkRateLimit();
+//
+//			if(checkLimit) {
+//				try {
+//					Thread.sleep(900000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//
+//			testApp.search("olympiacosbc");
+//
+//			System.out.println("all ok");
+//
+//		}
 
 
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
 
+		String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=5";
 
+		generalFunctions.topUsers(stringUrl);
 	}
 
 }

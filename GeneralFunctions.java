@@ -4,6 +4,11 @@ import twitter4j.JSONObject;
 import twitter4j.RateLimitStatus;
 import twitter4j.TwitterException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Statement;
 import java.util.*;
 
@@ -112,5 +117,47 @@ public class GeneralFunctions {
         }
 
         return sortedMap;
+    }
+
+    public static void topUsers(String stringUrl){
+
+        URL url;
+        TwitterUser twitterUser = new TwitterUser();
+
+        try {
+            url = new URL(stringUrl);
+            URLConnection uc;
+            uc = url.openConnection();
+
+            uc.setRequestProperty("X-Requested-With", "Curl");
+
+            String userpass = "admin" + ":" + "admin";
+            String basicAuth = "Basic " + new String(userpass.getBytes());
+            uc.setRequestProperty("Authorization", basicAuth);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+
+            JSONObject obj;
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+
+                try {
+                    obj = new JSONObject(line);
+                    long id_str = Long.parseLong(obj.getString("id_str"));
+                    System.out.println(id_str);
+                    twitterUser.findUsers(id_str);
+                    twitterUser.printGraphUserTweets(id_str);
+                    int cnt = Integer.parseInt(obj.getString("cnt"));
+                    System.out.println("Count: "+cnt);
+                } catch (JSONException e) {
+                    //e.printStackTrace();
+                }
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
