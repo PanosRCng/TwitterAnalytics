@@ -1,4 +1,5 @@
 import TwitterAnalytics.Models.Hashtag;
+import TwitterAnalytics.Tokenizer.Tokenizer;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TrendsResources;
@@ -116,30 +117,30 @@ public class TrendsApp
 
     private void trend_analysis()
     {
+        Tokenizer tokenizer = new Tokenizer();
+
+        /*
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
             System.out.println("----------------------- ------------------------------------");
 
             System.out.println(trend.name);
 
-            /*
+
             for(TwitterAnalytics.Models.Tweet tweet : trend.tweets())
             {
                 System.out.println("-----------------------");
                 System.out.println(tweet.text);
                 System.out.println("-----------------------");
-            }
-            */
 
-            for(TwitterAnalytics.Models.Hashtag hashtag : trend.hashtags())
-            {
-                System.out.println("-----------------------");
-                System.out.println(hashtag.name);
-                System.out.println("-----------------------");
+                tokenizer.tokenize(tweet.text);
+
+                //break;
             }
 
-            System.out.println("----------------------- ------------------------------------");
+            //break;
         }
+        */
     }
 
 }
