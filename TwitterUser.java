@@ -188,8 +188,9 @@ public class TwitterUser {
                 String[] splited = line.replaceAll("\\p{P}","").split("\\s+");
 
                 for(String tweet : splited){
-
+                    if(tweet.isEmpty()) continue;
                     try {
+
                         ResponseList<Status> tweets = TwitterApi.client().tweets().lookup(Long.parseLong(tweet));
 
                         for(Status tweetUser : tweets){

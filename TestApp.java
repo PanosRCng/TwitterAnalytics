@@ -183,8 +183,10 @@ public class TestApp
 
 	public static void main(String[] args)
 	{
-		TestApp testApp = new TestApp();
+		//TestApp testApp = new TestApp();
 		GeneralFunctions generalFunctions = new GeneralFunctions();
+
+		//generalFunctions.printTweets(2845541223L);
 
 //		while(true){
 //			GeneralFunctions generalFunctions = new GeneralFunctions();
@@ -208,7 +210,7 @@ public class TestApp
 		//testApp.showRateLimits();
 		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
 
-		String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=5";
+		String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=10";
 
 		generalFunctions.topUsers(stringUrl);
 	}

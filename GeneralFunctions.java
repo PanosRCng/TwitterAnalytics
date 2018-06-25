@@ -1,3 +1,4 @@
+import TwitterAnalytics.DB;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
@@ -9,6 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -156,6 +160,33 @@ public class GeneralFunctions {
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void printTweets(long pageID){
+
+        TwitterUser twitterUser = new TwitterUser();
+
+        String query = " select DISTINCT userID from temp where pageID=?";
+
+        PreparedStatement preparedStmt = null;
+        try {
+            preparedStmt = DB.conn().prepareStatement(query);
+
+            preparedStmt.setLong(1, pageID);
+
+            ResultSet rs = preparedStmt.executeQuery();
+
+            while (rs.next())
+            {
+
+                twitterUser.printGraphUserTweets(rs.getLong("userID"));
+
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
