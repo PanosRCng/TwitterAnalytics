@@ -6,8 +6,6 @@ import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.TwitterFactory;
 import twitter4j.Twitter;
 
-
-
 public class TwitterApi
 {
 
@@ -27,6 +25,7 @@ public class TwitterApi
         TwitterFactory twitterFactory = new TwitterFactory(confBuilder.build());
 
         this.twitter = twitterFactory.getInstance();
+
     }
 
 
@@ -40,6 +39,5 @@ public class TwitterApi
     {
         return SingletonHelper.INSTANCE.twitter;
     }
-
 
 }

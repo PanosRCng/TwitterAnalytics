@@ -183,8 +183,11 @@ public class TestApp
 
 	public static void main(String[] args)
 	{
+
+		StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@sport24");
+
 		//TestApp testApp = new TestApp();
-		GeneralFunctions generalFunctions = new GeneralFunctions();
+		//GeneralFunctions generalFunctions = new GeneralFunctions();
 
 		//generalFunctions.printTweets(2845541223L);
 
@@ -208,11 +211,11 @@ public class TestApp
 
 
 		//testApp.showRateLimits();
-		//testApp.search("#GolGR", "2018-06-05", "2018-06-07");
+		//testApp.search("olympiacosbc", "2018-05-05", "2018-06-25");
 
-		String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=10";
+		//String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=10";
 
-		generalFunctions.topUsers(stringUrl);
+		//generalFunctions.topUsers(stringUrl);
 	}
 
 }

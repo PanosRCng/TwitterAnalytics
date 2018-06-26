@@ -149,7 +149,7 @@ public class GeneralFunctions {
                     obj = new JSONObject(line);
                     long id_str = Long.parseLong(obj.getString("id_str"));
                     System.out.println(id_str);
-                    twitterUser.findUsers(id_str);
+                    //twitterUser.findUsers(id_str);
                     twitterUser.printGraphUserTweets(id_str);
                     int cnt = Integer.parseInt(obj.getString("cnt"));
                     System.out.println("Count: "+cnt);
