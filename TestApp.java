@@ -9,19 +9,25 @@ import twitter4j.*;
 
 import TwitterAnalytics.TwitterApi;
 import TwitterAnalytics.DB;
+import twitter4j.api.TimelinesResources;
 
 public class TestApp
 {
 
-	public void search(String query_string)
+	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph)
 	{
 
 		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
 		Map<Long, Date> statusDate = new HashMap<Long, Date>();
 
+		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
+
+		ResponseList<User> users;
+		int counter=0;
+		long userID=-1;
+
 		IDs ids;
 		long cursor = -1;
-		long pageID = -1;
 
 		GeneralFunctions generalFunctions = new GeneralFunctions();
 
@@ -50,13 +56,19 @@ public class TestApp
 
 		try
 		{
-			Query query = new Query(query_string);
-			QueryResult result;
+			TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
 			do
 			{
-				result = TwitterApi.client().search(query);
-				List<Status> tweets = result.getTweets();
+				users = TwitterApi.client().searchUsers(query_string, -1);
+
+				for (User user : users) {
+					counter++;
+					userID = user.getId();
+					break;
+				}
+
+				ResponseList<Status> tweets = timelinesResource.getUserTimeline(userID);
 
 				for(Status tweet : tweets)
 				{
@@ -64,19 +76,65 @@ public class TestApp
 
 					//getAmplifiersStats(tweet.getUser().getId());
 
-					pageID = tweet.getUser().getId();
-
 					do {
 
 						ids = TwitterApi.client().tweets().getRetweeterIds(tweet.getId(), cursor);
 
 						for (long id : ids.getIDs()) {
 
-							if(!amplifiers.containsEntry(id,tweet.getId())){
-								amplifiers.put(id,tweet.getId());
-							}
+							if(!amplifiers.containsValue(userID)) userRetweeterGraph.getInstance().addVertex(userID);
 							if(!statusDate.containsKey(tweet.getId())){
 								statusDate.put(tweet.getId(), tweet.getCreatedAt());
+							}
+							if(!amplifiers.containsEntry(id,tweet.getId())){
+								amplifiers.put(id,tweet.getId());
+
+								userRetweeterGraph.getInstance().addVertex(id);
+								userRetweeterGraph.getInstance().addEdge(id, userID);
+							}
+
+							ResponseList<Status> tweetsUser = timelinesResource.getUserTimeline(id);
+
+							String user_tweets = "select * from tweets where userID="+id;
+
+							PreparedStatement ps = null;
+
+							try {
+								ps = DB.conn().prepareStatement(user_tweets);
+
+								ResultSet rs = ps.executeQuery();
+
+								boolean checkDB = rs.next();
+
+								if(checkDB){
+
+									do {
+										if(!userTweets.containsEntry(rs.getLong("userID"),rs.getLong("statusID"))) userTweets.put(rs.getLong("userID"), rs.getLong("statusID"));
+									}while (rs.next());
+
+								}
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
+
+							user_tweets = "insert into tweets (userID, statusID, date) values (?, ?, ?)";
+
+							for(Status status : tweetsUser)
+							{
+								if(!userTweets.containsEntry(id,status.getId())){
+									try {
+										ps = DB.conn().prepareStatement(user_tweets);
+
+										ps.setLong    (1, id);
+										ps.setLong    (2, status.getId());
+										ps.setDate   (3, new java.sql.Date(status.getCreatedAt().getTime()));
+
+										// execute the preparedstatement
+										ps.execute();
+									} catch (SQLException e) {
+										e.printStackTrace();
+									}
+								}
 							}
 
 						}
@@ -85,8 +143,7 @@ public class TestApp
 
 				}
 
-			}
-			while( (query = result.nextQuery()) != null );
+			}while(users.size() != 0 && counter==0);
 
 			//Map<Long, Integer> sortedMap = generalFunctions.sortByValue(amplifiers);
 
@@ -123,7 +180,7 @@ public class TestApp
 
 						preparedStmt.setLong    (1, key);
 						preparedStmt.setLong    (2, value);
-						preparedStmt.setLong    (3, pageID);
+						preparedStmt.setLong    (3, userID);
 						preparedStmt.setDate    (4, new java.sql.Date(statusDate.get(value).getTime()));
 
 						preparedStmt.addBatch();
@@ -184,30 +241,34 @@ public class TestApp
 	public static void main(String[] args)
 	{
 
-		StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@sport24");
+		//StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@sport24");
 
-		//TestApp testApp = new TestApp();
+		TestApp testApp = new TestApp();
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 
 		//generalFunctions.printTweets(2845541223L);
 
-//		while(true){
-//			GeneralFunctions generalFunctions = new GeneralFunctions();
-//			boolean checkLimit = generalFunctions.checkRateLimit();
-//
-//			if(checkLimit) {
-//				try {
-//					Thread.sleep(900000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//
-//			testApp.search("olympiacosbc");
-//
-//			System.out.println("all ok");
-//
-//		}
+		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+
+		while(true){
+			GeneralFunctions generalFunctions = new GeneralFunctions();
+			boolean checkLimit = generalFunctions.checkRateLimit();
+
+			if(checkLimit) {
+				try {
+					Thread.sleep(900000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			System.out.println(userRetweeterGraph.getInstance().toString());
+
+			testApp.trackUserTimeLine("@sport24", userRetweeterGraph);
+
+			System.out.println("all ok");
+
+		}
 
 
 		//testApp.showRateLimits();
