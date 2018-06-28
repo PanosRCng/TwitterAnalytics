@@ -2,13 +2,12 @@ package TwitterAnalytics;
 
 
 import TwitterAnalytics.ConfigManager.Config;
-import twitter4j.RateLimitStatus;
-import twitter4j.TwitterException;
+import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.TwitterFactory;
-import twitter4j.Twitter;
 
 import java.util.Map;
+import java.util.Vector;
+
 
 
 public class TwitterApi
@@ -90,6 +89,29 @@ public class TwitterApi
         }
 
         return false;
+    }
+
+
+    public static String cleanTweetText(Status tweet)
+    {
+        // tweet clean (remove hastags, remove users' mentions, remove links) remove all entities given by interface EntitySupport
+
+        Vector<String> to_remove = new Vector<>();
+
+        for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
+        {
+            to_remove.add( "#" + hashtagEntity.getText() );
+        }
+
+
+        String text = tweet.getText();
+
+        for(String d : to_remove)
+        {
+            text = text.replace(d, " ");
+        }
+
+        return text;
     }
 
 }

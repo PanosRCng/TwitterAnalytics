@@ -93,7 +93,9 @@ public class TrendsApp
 
                     tweet_counter++;
 
-                    TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(tweet.getText(), tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                    String clean_text = TwitterApi.cleanTweetText( tweet );
+
+                    TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
                     tweetC.save();
 
                     for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
@@ -119,7 +121,7 @@ public class TrendsApp
     {
         Tokenizer tokenizer = new Tokenizer();
 
-        /*
+
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
             System.out.println("----------------------- ------------------------------------");
@@ -130,17 +132,20 @@ public class TrendsApp
             for(TwitterAnalytics.Models.Tweet tweet : trend.tweets())
             {
                 System.out.println("-----------------------");
+
                 System.out.println(tweet.text);
-                System.out.println("-----------------------");
 
                 tokenizer.tokenize(tweet.text);
+
+                System.out.println("-----------------------");
+                System.out.println("-----------------------");
 
                 //break;
             }
 
             //break;
         }
-        */
+
     }
 
 }
