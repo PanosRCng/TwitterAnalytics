@@ -10,7 +10,7 @@ public class Settings
 
     public Map<String, Object> settings()
     {
-        Map<String, Object> settings_map = new HashMap<>();
+        Map<String, Object> settings_map = new HashMap<String, Object>();
 
         try
         {

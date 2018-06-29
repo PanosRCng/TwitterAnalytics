@@ -5,6 +5,9 @@ import java.util.Date;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import twitter4j.*;
 
 import TwitterAnalytics.TwitterApi;
@@ -14,13 +17,9 @@ import twitter4j.api.TimelinesResources;
 public class TestApp
 {
 
-	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph)
+	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph,
+								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate, Multimap<Long, Long> userTweets)
 	{
-
-		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
-		Map<Long, Date> statusDate = new HashMap<Long, Date>();
-
-		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
 
 		ResponseList<User> users;
 		int counter=0;
@@ -45,8 +44,8 @@ public class TestApp
 			if(checkDB){
 
 				do {
-					amplifiers.put(rs.getLong("userID"), rs.getLong("statusID"));
-					statusDate.put(rs.getLong("statusID"), rs.getDate("date"));
+					if(!amplifiers.containsEntry(rs.getLong("userID"),rs.getLong("statusID"))) amplifiers.put(rs.getLong("userID"), rs.getLong("statusID"));
+					if(!statusDate.containsKey(rs.getLong("statusID"))) statusDate.put(rs.getLong("statusID"), rs.getDate("date"));
 				}while (rs.next());
 
 			}
@@ -82,15 +81,17 @@ public class TestApp
 
 						for (long id : ids.getIDs()) {
 
-							if(!amplifiers.containsValue(userID)) userRetweeterGraph.getInstance().addVertex(userID);
 							if(!statusDate.containsKey(tweet.getId())){
 								statusDate.put(tweet.getId(), tweet.getCreatedAt());
 							}
 							if(!amplifiers.containsEntry(id,tweet.getId())){
 								amplifiers.put(id,tweet.getId());
 
+								if(!userRetweeterGraph.getInstance().containsVertex(userID)) userRetweeterGraph.getInstance().addVertex(userID);
+
 								userRetweeterGraph.getInstance().addVertex(id);
 								userRetweeterGraph.getInstance().addEdge(id, userID);
+
 							}
 
 							ResponseList<Status> tweetsUser = timelinesResource.getUserTimeline(id);
@@ -149,7 +150,7 @@ public class TestApp
 
 			//for(Map.Entry<Long, Integer> entry : sortedMap.entrySet())
 			//{
-				//System.out.println(entry.getKey() + " : " + entry.getValue());
+			//System.out.println(entry.getKey() + " : " + entry.getValue());
 			//}
 		}
 		catch(TwitterException te)
@@ -238,19 +239,41 @@ public class TestApp
 		}
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 
-		//StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@sport24");
+		StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@Eurohoopsnet");
 
 		TestApp testApp = new TestApp();
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 
 		//generalFunctions.printTweets(2845541223L);
 
-		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+		//UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
 
-		while(true){
+		//Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
+		//Map<Long, Date> statusDate = new HashMap<Long, Date>();
+
+		//Multimap<Long, Long> userTweets = ArrayListMultimap.create();
+
+		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		context.setContextPath("/");
+
+		Server jettyServer = new Server(8888);
+		jettyServer.setHandler(context);
+
+		context.addServlet(new ServletHolder(new TopUsersServlet(512445285)),
+				"/userTweetGraph/topUsers");
+
+		System.out.println(String.format("%tc: Starting service on port %d", new Date(), 8888));
+		try {
+			jettyServer.start();
+			jettyServer.join();
+		} finally {
+			jettyServer.destroy();
+		}
+
+		/*while(true){
 			GeneralFunctions generalFunctions = new GeneralFunctions();
 			boolean checkLimit = generalFunctions.checkRateLimit();
 
@@ -264,11 +287,11 @@ public class TestApp
 
 			System.out.println(userRetweeterGraph.getInstance().toString());
 
-			testApp.trackUserTimeLine("@sport24", userRetweeterGraph);
+			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets);
 
 			System.out.println("all ok");
 
-		}
+		}*/
 
 
 		//testApp.showRateLimits();

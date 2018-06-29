@@ -8,7 +8,7 @@ public class UserRetweeterGraph {
 
     public UserRetweeterGraph() {
 
-        this.graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+        this.graph = new DefaultDirectedGraph<Long, DefaultEdge>(DefaultEdge.class);
 
     }
 
