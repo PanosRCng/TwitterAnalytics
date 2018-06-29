@@ -95,7 +95,7 @@ public class TrendsApp
 
                     String clean_text = TwitterApi.cleanTweetText( tweet );
 
-                    TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                    TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(tweet.getText(), clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
                     tweetC.save();
 
                     for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
@@ -135,7 +135,7 @@ public class TrendsApp
 
                 System.out.println(tweet.text);
 
-                tokenizer.tokenize(tweet.text);
+                tokenizer.tokenize(tweet.clean_text);
 
                 System.out.println("-----------------------");
                 System.out.println("-----------------------");

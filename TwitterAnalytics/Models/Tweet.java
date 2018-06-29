@@ -14,6 +14,7 @@ public class Tweet extends DBModel
 
 
     public String text;
+    public String clean_text;
     public long id;
     public int trend_id;
     public Timestamp timestamp;
@@ -29,6 +30,16 @@ public class Tweet extends DBModel
     public Tweet(String text, long id, int trend_id, Timestamp timestamp)
     {
         this.text = text;
+        this.id = id;
+        this.trend_id = trend_id;
+        this.timestamp = timestamp;
+    }
+
+
+    public Tweet(String text, String clean_text, long id, int trend_id, Timestamp timestamp)
+    {
+        this.text = text;
+        this.clean_text = clean_text;
         this.id = id;
         this.trend_id = trend_id;
         this.timestamp = timestamp;

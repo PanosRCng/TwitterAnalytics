@@ -7,6 +7,7 @@ public class Tokenizer
 {
     public static final String PUNCTUATIONS_FILE = "punctuations.txt";
     public static final String SYMBOLS_FILE = "symbols.txt";
+    public static final String[] WORD_DIVIDERS = {"\t", "\r", "\n"};
 
     private Settings settings;
 
@@ -30,6 +31,8 @@ public class Tokenizer
 
     public Vector<String> tokenize(String text)
     {
+        text = this.removeWordDividers(text);
+
         if( this.settings.removePunctuations() )
         {
             text = this.removePunctuations(text);
@@ -40,20 +43,29 @@ public class Tokenizer
             text = this.removeSymbols(text);
         }
 
+        Vector<String> tokens = this.getTokens(text, " ");
+
+        if( this.settings.removeNumbers() )
+        {
+            tokens = this.removeNumbers(tokens);
+        }
+
+        if( this.settings.removeMinLength() )
+        {
+            tokens = this.removeMinLength(tokens, 2);
+        }
+
 
 
         System.out.println(text);
-
-        /*
-        Vector<String> tokens = this.getTokens(text, " ");
 
         for(String token : tokens)
         {
             System.out.println("|" + token + "|");
         }
 
-        return tokens;
-        */
+        //return tokens;
+
 
         return null;
     }
@@ -66,10 +78,29 @@ public class Tokenizer
 
         for(String part : text.split(delimeter))
         {
+            if(part.length() == 0)
+            {
+                continue;
+            }
+
             tokens.add(part);
         }
 
         return tokens;
+    }
+
+
+    private String removeWordDividers(String text)
+    {
+        for(String wordDivider : WORD_DIVIDERS)
+        {
+            if(text.contains(wordDivider))
+            {
+                text = text.replace(wordDivider, " ");
+            }
+        }
+
+        return text;
     }
 
 
@@ -98,6 +129,44 @@ public class Tokenizer
         }
 
         return text;
+    }
+
+
+    private Vector<String> removeNumbers(Vector<String> tokens)
+    {
+        Vector<String> new_tokens = new Vector<>();
+
+        for(String token : tokens)
+        {
+            token = token.replaceAll("[0-9]","");
+
+            if(token.length() == 0)
+            {
+                continue;
+            }
+
+            new_tokens.add(token);
+        }
+
+        return new_tokens;
+    }
+
+
+    private Vector<String> removeMinLength(Vector<String>tokens, int length)
+    {
+        Vector<String> new_tokens = new Vector<>();
+
+        for(String token : tokens)
+        {
+            if(token.length() <= length)
+            {
+                continue;
+            }
+
+            new_tokens.add(token);
+        }
+
+        return new_tokens;
     }
 
 

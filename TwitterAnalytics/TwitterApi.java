@@ -94,8 +94,6 @@ public class TwitterApi
 
     public static String cleanTweetText(Status tweet)
     {
-        // tweet clean (remove hastags, remove users' mentions, remove links) remove all entities given by interface EntitySupport
-
         Vector<String> to_remove = new Vector<>();
 
         for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
@@ -103,6 +101,25 @@ public class TwitterApi
             to_remove.add( "#" + hashtagEntity.getText() );
         }
 
+        for(UserMentionEntity userMentionEntity : tweet.getUserMentionEntities())
+        {
+            to_remove.add( "@" + userMentionEntity.getScreenName() );
+        }
+
+        for(URLEntity urlEntity : tweet.getURLEntities())
+        {
+            to_remove.add( urlEntity.getText() );
+        }
+
+        for(MediaEntity mediaEntity : tweet.getMediaEntities())
+        {
+            to_remove.add( mediaEntity.getText() );
+        }
+
+        for(SymbolEntity symbolEntity : tweet.getSymbolEntities())
+        {
+            to_remove.add( symbolEntity.getText() );
+        }
 
         String text = tweet.getText();
 
