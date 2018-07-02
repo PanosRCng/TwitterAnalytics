@@ -3,6 +3,7 @@ import java.util.*;
 import TwitterAnalytics.Models.DBModel;
 import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.Tweet;
+import TwitterAnalytics.Sentimenter.SentimentLexicon.SentimentLexicon;
 import twitter4j.RateLimitStatus;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -152,7 +153,10 @@ public class TestApp
 
 		//TestApp2 testApp2 = new TestApp2();
 
-		TrendsApp trendsApp = new TrendsApp();
+		//TrendsApp trendsApp = new TrendsApp();
+
+
+		SentimentLexicon sentimentLexicon = SentimentLexicon.load();
 
 
 		System.out.println("all ok");
