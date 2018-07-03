@@ -55,10 +55,10 @@ public class Entry
     public String surprise3;
     public String surprise4;
 
-    public String aditional1;
-    public String aditional2;
-    public String aditional3;
-    public String aditional4;
+    public String additional1;
+    public String additional2;
+    public String additional3;
+    public String additional4;
 
     public String comments1;
     public String comments2;
@@ -88,7 +88,50 @@ public class Entry
         entry.subjectivity3 = parts.get(7);
         entry.subjectivity4 = parts.get(8);
 
-        System.out.println(entry.subjectivity1);
+        entry.polarity1 = parts.get(9);
+        entry.polarity2 = parts.get(10);
+        entry.polarity3 = parts.get(11);
+        entry.polarity4 = parts.get(12);
+
+        entry.anger1 = parts.get(13);
+        entry.anger2 = parts.get(14);
+        entry.anger3 = parts.get(15);
+        entry.anger4 = parts.get(16);
+
+        entry.disgust1 = parts.get(17);
+        entry.disgust2 = parts.get(18);
+        entry.disgust3 = parts.get(19);
+        entry.disgust4 = parts.get(20);
+
+        entry.fear1 = parts.get(21);
+        entry.fear2 = parts.get(22);
+        entry.fear3 = parts.get(23);
+        entry.fear4 = parts.get(24);
+
+        entry.happiness1 = parts.get(25);
+        entry.happiness2 = parts.get(26);
+        entry.happiness3 = parts.get(27);
+        entry.happiness4 = parts.get(28);
+
+        entry.sadness1 = parts.get(29);
+        entry.sadness2 = parts.get(30);
+        entry.sadness3 = parts.get(31);
+        entry.sadness4 = parts.get(32);
+
+        entry.surprise1 = parts.get(33);
+        entry.surprise2 = parts.get(34);
+        entry.surprise3 = parts.get(35);
+        entry.surprise4 = parts.get(36);
+
+        entry.additional1 = parts.get(37);
+        entry.additional2 = parts.get(38);
+        entry.additional3 = parts.get(39);
+        entry.additional4 = parts.get(40);
+
+        entry.comments1 = parts.get(41);
+        entry.comments2 = parts.get(42);
+        entry.comments3 = parts.get(43);
+        entry.comments4 = parts.get(44);
 
         return entry;
     }

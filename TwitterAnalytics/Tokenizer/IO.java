@@ -1,6 +1,7 @@
 package TwitterAnalytics.Tokenizer;
 
 
+import java.util.HashMap;
 import java.util.Vector;
 import java.io.FileInputStream;
 import java.io.BufferedReader;
@@ -42,6 +43,36 @@ public class IO
         }
 
         return lines;
+    }
+
+
+    public static HashMap<String, String> readMapFile(String filename)
+    {
+        HashMap<String, String> map = new HashMap<>();
+
+        try
+        {
+            FileInputStream fileStream = new FileInputStream( IO.getFilePath(filename) );
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileStream));
+
+            String line;
+
+            while( (line = bufferedReader.readLine()) != null )
+            {
+                String[] parts = line.split("\t");
+
+                map.put(parts[0], parts[1]);
+            }
+
+            bufferedReader.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+
+        return map;
     }
 
 

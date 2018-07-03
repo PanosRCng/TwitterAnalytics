@@ -9,6 +9,9 @@ public class Settings
     private boolean remove_symbols = true;
     private boolean remove_numbers = true;
     private boolean remove_min_length = true;
+    private boolean remove_intonations = false;
+    private boolean all_uppercase = false;
+    private boolean all_lowercase = true;
 
 
     public Settings()
@@ -63,4 +66,39 @@ public class Settings
         this.remove_min_length = remove_min_length;
     }
 
+
+    public boolean removeIntonations()
+    {
+        return this.remove_intonations;
+    }
+
+
+    public void setRemoveIntonations(boolean intonations)
+    {
+        this.remove_intonations = intonations;
+    }
+
+
+    public boolean all_uppercase()
+    {
+        return this.all_uppercase;
+    }
+
+
+    public void setAllUppercase(boolean all_uppercase)
+    {
+        this.all_uppercase = all_uppercase;
+    }
+
+
+    public boolean all_lowercase()
+    {
+        return this.all_lowercase;
+    }
+
+
+    public void setAllLowercase(boolean all_lowercase)
+    {
+        this.all_lowercase = all_lowercase;
+    }
 }

@@ -153,10 +153,10 @@ public class TestApp
 
 		//TestApp2 testApp2 = new TestApp2();
 
-		//TrendsApp trendsApp = new TrendsApp();
+		TrendsApp trendsApp = new TrendsApp();
 
 
-		SentimentLexicon sentimentLexicon = SentimentLexicon.load();
+		//SentimentLexicon sentimentLexicon = SentimentLexicon.load();
 
 
 		System.out.println("all ok");

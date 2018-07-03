@@ -1,18 +1,24 @@
 package TwitterAnalytics.Tokenizer;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 public class Tokenizer
 {
     public static final String PUNCTUATIONS_FILE = "punctuations.txt";
     public static final String SYMBOLS_FILE = "symbols.txt";
+    public static final String INTONATIONS_FILE = "intonations.txt";
+    public static final String LOWERCASE_TO_UPPERCASE_FILE = "lowercase_to_uppercase.txt";
     public static final String[] WORD_DIVIDERS = {"\t", "\r", "\n"};
 
     private Settings settings;
 
     private Vector<String> punctuations;
     private Vector<String> symbols;
+    private HashMap<String, String> intonationsMap;
+    private HashMap<String, String> lowercaseToUppercaseMap;
 
 
     public Tokenizer()
@@ -43,6 +49,20 @@ public class Tokenizer
             text = this.removeSymbols(text);
         }
 
+        if( this.settings.removeIntonations() )
+        {
+            text = this.removeIntonations(text);
+        }
+
+        if( this.settings.all_uppercase() )
+        {
+            text = this.uppercase(text);
+        }
+        else if( this.settings.all_lowercase() )
+        {
+            text = this.lowercase(text);
+        }
+
         Vector<String> tokens = this.getTokens(text, " ");
 
         if( this.settings.removeNumbers() )
@@ -54,8 +74,6 @@ public class Tokenizer
         {
             tokens = this.removeMinLength(tokens, 2);
         }
-
-
 
         System.out.println(text);
 
@@ -132,6 +150,57 @@ public class Tokenizer
     }
 
 
+    private String removeIntonations(String text)
+    {
+        for(Map.Entry<String,String> innotation : this.intonationsMap.entrySet())
+        {
+            String innotated = innotation.getKey();
+            String non_innotated = innotation.getValue();
+
+            if(text.contains(innotated))
+            {
+                text = text.replace(innotated, non_innotated);
+            }
+        }
+
+        return text;
+    }
+
+
+    private String uppercase(String text)
+    {
+        for(Map.Entry<String,String> lowercase_to_uppercase : this.lowercaseToUppercaseMap.entrySet())
+        {
+            String lowercase = lowercase_to_uppercase.getKey();
+            String uppercase = lowercase_to_uppercase.getValue();
+
+            if(text.contains(lowercase))
+            {
+                text = text.replace(lowercase, uppercase);
+            }
+        }
+
+        return text;
+    }
+
+
+    private String lowercase(String text)
+    {
+        for(Map.Entry<String,String> lowercase_to_uppercase : this.lowercaseToUppercaseMap.entrySet())
+        {
+            String lowercase = lowercase_to_uppercase.getKey();
+            String uppercase = lowercase_to_uppercase.getValue();
+
+            if(text.contains(uppercase))
+            {
+                text = text.replace(uppercase, lowercase);
+            }
+        }
+
+        return text;
+    }
+
+
     private Vector<String> removeNumbers(Vector<String> tokens)
     {
         Vector<String> new_tokens = new Vector<>();
@@ -180,6 +249,16 @@ public class Tokenizer
         if(this.settings.removeSymbols())
         {
             this.symbols = IO.readFile(SYMBOLS_FILE);
+        }
+
+        if(this.settings.removeIntonations())
+        {
+            this.intonationsMap = IO.readMapFile(INTONATIONS_FILE);
+        }
+
+        if( (this.settings.all_uppercase()) || (this.settings.all_lowercase()) )
+        {
+            this.lowercaseToUppercaseMap = IO.readMapFile(LOWERCASE_TO_UPPERCASE_FILE);
         }
     }
 }
