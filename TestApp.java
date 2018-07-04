@@ -3,11 +3,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultUndirectedGraph;
 import twitter4j.*;
 
 import TwitterAnalytics.TwitterApi;
@@ -16,6 +15,61 @@ import twitter4j.api.TimelinesResources;
 
 public class TestApp
 {
+
+	public void printUserTweetsFromGraph(){
+
+		Graph<Long, DefaultEdge> graph = new DefaultUndirectedGraph<Long, DefaultEdge>(DefaultEdge.class);
+
+		String query_temp = "select * from tweets";
+
+		PreparedStatement preparedStmt = null;
+		try {
+			preparedStmt = DB.conn().prepareStatement(query_temp);
+
+			ResultSet rs = preparedStmt.executeQuery();
+
+			while (rs.next()){
+
+				boolean flag = false;
+				if(!graph.containsVertex(rs.getLong("userID"))){
+					graph.addVertex(rs.getLong("userID"));
+					flag = true;
+				}
+				if(!graph.containsVertex(rs.getLong("statusID"))){
+					graph.addVertex(rs.getLong("statusID"));
+					flag = true;
+				}
+				if(flag==true) graph.addEdge(rs.getLong("userID"), rs.getLong("statusID"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		Set<Long> vertices = graph.vertexSet();
+
+		for (Long vertex : vertices) {
+			Set<DefaultEdge> userTweets = graph.edgesOf(vertex);
+			for(DefaultEdge edge : userTweets) {
+
+				String tweetID = edge.toString().substring(0, edge.toString().length() - 1).split(":")[1].trim();
+
+				System.out.println(tweetID);
+
+				ResponseList<Status> tweets = null;
+
+				try {
+					tweets = TwitterApi.client().tweets().lookup(Long.parseLong(tweetID));
+					for(Status tweetUser : tweets){
+						System.out.println(tweetUser.getText());
+					}
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+			}
+
+			break;
+		}
+	}
 
 	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph,
 								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate, Multimap<Long, Long> userTweets)
@@ -242,56 +296,56 @@ public class TestApp
 	public static void main(String[] args) throws Exception
 	{
 
-		StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@Eurohoopsnet");
+		//StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@Eurohoopsnet");
 
 		TestApp testApp = new TestApp();
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 
 		//generalFunctions.printTweets(2845541223L);
 
-		//UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+//		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+//
+//		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
+//		Map<Long, Date> statusDate = new HashMap<Long, Date>();
+//
+//		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
 
-		//Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
-		//Map<Long, Date> statusDate = new HashMap<Long, Date>();
+//		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+//		context.setContextPath("/");
+//
+//		Server jettyServer = new Server(8888);
+//		jettyServer.setHandler(context);
+//
+//		context.addServlet(new ServletHolder(new TopUsersServlet(512445285)),
+//				"/userTweetGraph/topUsers");
+//
+//		System.out.println(String.format("%tc: Starting service on port %d", new Date(), 8888));
+//		try {
+//			jettyServer.start();
+//			jettyServer.join();
+//		} finally {
+//			jettyServer.destroy();
+//		}
 
-		//Multimap<Long, Long> userTweets = ArrayListMultimap.create();
-
-		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context.setContextPath("/");
-
-		Server jettyServer = new Server(8888);
-		jettyServer.setHandler(context);
-
-		context.addServlet(new ServletHolder(new TopUsersServlet(512445285)),
-				"/userTweetGraph/topUsers");
-
-		System.out.println(String.format("%tc: Starting service on port %d", new Date(), 8888));
-		try {
-			jettyServer.start();
-			jettyServer.join();
-		} finally {
-			jettyServer.destroy();
-		}
-
-		/*while(true){
-			GeneralFunctions generalFunctions = new GeneralFunctions();
-			boolean checkLimit = generalFunctions.checkRateLimit();
-
-			if(checkLimit) {
-				try {
-					Thread.sleep(900000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-			System.out.println(userRetweeterGraph.getInstance().toString());
-
-			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets);
-
-			System.out.println("all ok");
-
-		}*/
+//		while(true){
+//			GeneralFunctions generalFunctions = new GeneralFunctions();
+//			boolean checkLimit = generalFunctions.checkRateLimit();
+//
+//			if(checkLimit) {
+//				try {
+//					Thread.sleep(900000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//
+//			System.out.println(userRetweeterGraph.getInstance().toString());
+//
+//			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets);
+//
+//			System.out.println("all ok");
+//
+//		}
 
 
 		//testApp.showRateLimits();
@@ -300,6 +354,9 @@ public class TestApp
 		//String stringUrl = "http://localhost:8888/userTweetGraph/topUsers?k=10";
 
 		//generalFunctions.topUsers(stringUrl);
+
+		testApp.printUserTweetsFromGraph();
+
 	}
 
 }

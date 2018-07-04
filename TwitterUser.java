@@ -35,7 +35,7 @@ public class TwitterUser {
                 //this.userStats(user, false);
                 //this.userStats(user, true);
 
-                twitterUser.printUserStatsByDate(user);
+                //twitterUser.printUserStatsByDate(user);
 
                 //this.userTimeline(user.getId());
             }
