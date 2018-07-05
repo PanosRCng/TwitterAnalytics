@@ -8,10 +8,11 @@ public class Settings
     private boolean remove_punctuations = true;
     private boolean remove_symbols = true;
     private boolean remove_numbers = true;
-    private boolean remove_min_length = true;
-    private boolean remove_intonations = false;
-    private boolean all_uppercase = false;
-    private boolean all_lowercase = true;
+    private boolean remove_min_length = false;
+    private boolean remove_intonations = true;
+    private boolean all_uppercase = true;
+    private boolean all_lowercase = false;
+    private boolean remove_stopwords = true;
 
 
     public Settings()
@@ -100,5 +101,17 @@ public class Settings
     public void setAllLowercase(boolean all_lowercase)
     {
         this.all_lowercase = all_lowercase;
+    }
+
+
+    public boolean removeStopwords()
+    {
+        return this.remove_stopwords;
+    }
+
+
+    public void setRemoveStowords(boolean remove_stopwords)
+    {
+        this.remove_stopwords = remove_stopwords;
     }
 }

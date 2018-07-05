@@ -7,6 +7,7 @@ import java.util.Vector;
 
 public class Tokenizer
 {
+    public static final String STOPWORDS_FILE = "stopwords_gr_nlp.txt";
     public static final String PUNCTUATIONS_FILE = "punctuations.txt";
     public static final String SYMBOLS_FILE = "symbols.txt";
     public static final String INTONATIONS_FILE = "intonations.txt";
@@ -15,6 +16,7 @@ public class Tokenizer
 
     private Settings settings;
 
+    private Vector<String> stopwords;
     private Vector<String> punctuations;
     private Vector<String> symbols;
     private HashMap<String, String> intonationsMap;
@@ -68,6 +70,11 @@ public class Tokenizer
         if( this.settings.removeNumbers() )
         {
             tokens = this.removeNumbers(tokens);
+        }
+
+        if( this.settings.removeStopwords() )
+        {
+            tokens = this.removeStopwords(tokens);
         }
 
         if( this.settings.removeMinLength() )
@@ -201,6 +208,32 @@ public class Tokenizer
     }
 
 
+    private Vector<String> removeStopwords(Vector<String> tokens)
+    {
+        Vector<String> new_tokens = new Vector<>();
+
+        for(String token : tokens)
+        {
+            boolean found = false;
+
+            for(String stopword : this.stopwords)
+            {
+                if(token.equals(stopword))
+                {
+                    found = true;
+                }
+            }
+
+            if(!found)
+            {
+                new_tokens.add(token);
+            }
+        }
+
+        return new_tokens;
+    }
+
+
     private Vector<String> removeNumbers(Vector<String> tokens)
     {
         Vector<String> new_tokens = new Vector<>();
@@ -241,6 +274,11 @@ public class Tokenizer
 
     private void setup()
     {
+        if(this.settings.removeStopwords())
+        {
+            this.stopwords = IO.readFile(STOPWORDS_FILE);
+        }
+
         if(this.settings.removePunctuations())
         {
             this.punctuations = IO.readFile(PUNCTUATIONS_FILE);
