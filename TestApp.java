@@ -3,8 +3,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.scoring.AlphaCentrality;
+import org.jgrapht.alg.scoring.BetweennessCentrality;
+import org.jgrapht.alg.scoring.ClosenessCentrality;
+import org.jgrapht.alg.scoring.HarmonicCentrality;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 import twitter4j.*;
@@ -12,9 +18,108 @@ import twitter4j.*;
 import TwitterAnalytics.TwitterApi;
 import TwitterAnalytics.DB;
 import twitter4j.api.TimelinesResources;
+import twitter4j.api.UsersResources;
 
 public class TestApp
 {
+
+	public void printCentralityResult(String centrality, boolean printMostInfluentialPerson) {
+
+		UserRetweeterGraph graph = new UserRetweeterGraph();
+
+		String query_temp = "select * from retweetertable";
+
+		PreparedStatement preparedStmt = null;
+		try {
+			preparedStmt = DB.conn().prepareStatement(query_temp);
+
+			ResultSet rs = preparedStmt.executeQuery();
+
+			while (rs.next()) {
+
+				boolean flag = false;
+				if (!graph.getInstance().containsVertex(rs.getLong("retweeterID"))) {
+					graph.getInstance().addVertex(rs.getLong("retweeterID"));
+					flag = true;
+				}
+				if (!graph.getInstance().containsVertex(rs.getLong("retweetedUserID"))) {
+					graph.getInstance().addVertex(rs.getLong("retweetedUserID"));
+					flag = true;
+				}
+				if (flag == true) graph.getInstance().addEdge(rs.getLong("retweeterID"), rs.getLong("retweetedUserID"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		Map<Long, Double> map;
+
+		if (centrality.equals("alpha")) {
+
+			AlphaCentrality alphaCentrality = new AlphaCentrality(graph.getInstance());
+			map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
+			System.out.println(map);
+
+		} else if ((centrality.equals("betweenness"))) {
+
+			BetweennessCentrality betweennessCentrality = new BetweennessCentrality(graph.getInstance());
+			map = GeneralFunctions.sortByValue(betweennessCentrality.getScores());
+			System.out.println(map);
+
+		} else if ((centrality.equals("closeness"))) {
+
+			ClosenessCentrality closenessCentrality = new ClosenessCentrality(graph.getInstance());
+			map = GeneralFunctions.sortByValue(closenessCentrality.getScores());
+			System.out.println(map);
+
+		}else if((centrality.equals("harmonic"))) {
+
+			HarmonicCentrality harmonicCentrality = new HarmonicCentrality(graph.getInstance());
+			map = GeneralFunctions.sortByValue(harmonicCentrality.getScores());
+			System.out.println(map);
+
+		}else{
+
+			AlphaCentrality alphaCentrality = new AlphaCentrality(graph.getInstance());
+			map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
+			System.out.println(map);
+
+		}
+
+		if(printMostInfluentialPerson==true){
+			try
+			{
+				UsersResources userResource = TwitterApi.client().users();
+
+				Iterator iter = map.entrySet().iterator();
+				iter.next();
+				Map.Entry<Long, Double> entry = (Map.Entry<Long, Double>) iter.next();
+
+				Long key = entry.getKey();
+
+				ResponseList<User> users = userResource.lookupUsers(key);
+
+				for(User user : users)
+				{
+
+					System.out.println("Most influential person: " + user.getName() + " - " + user.getScreenName());
+					Double value = entry.getValue();
+					System.out.println("Score: " + Math.round(value * 100.0) / 100.0);
+					Set<DefaultEdge> userTweets = graph.getInstance().edgesOf(key);
+					System.out.println("Number of edges: " + userTweets.size());
+					System.out.println("Location : " + user.getLocation());
+
+					break;
+				}
+			}
+			catch(TwitterException twitterException)
+			{
+				twitterException.printStackTrace();
+				System.out.println("Failed : " + twitterException.getMessage());
+			}
+
+		}
+	}
 
 	public void printUserTweetsFromGraph(){
 
@@ -72,7 +177,8 @@ public class TestApp
 	}
 
 	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph,
-								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate, Multimap<Long, Long> userTweets)
+								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate,
+								  Multimap<Long, Long> userTweets, Multimap<Long, Long> userRetweeters)
 	{
 
 		ResponseList<User> users;
@@ -151,15 +257,20 @@ public class TestApp
 							ResponseList<Status> tweetsUser = timelinesResource.getUserTimeline(id);
 
 							String user_tweets = "select * from tweets where userID="+id;
+							String user_retweeters = "select * from retweetertable where retweetedUserID="+id;
 
 							PreparedStatement ps = null;
+							PreparedStatement ps2 = null;
 
 							try {
 								ps = DB.conn().prepareStatement(user_tweets);
+								ps2 = DB.conn().prepareStatement(user_retweeters);
 
 								ResultSet rs = ps.executeQuery();
+								ResultSet rs2 = ps2.executeQuery();
 
 								boolean checkDB = rs.next();
+								boolean check2DB = rs2.next();
 
 								if(checkDB){
 
@@ -168,11 +279,25 @@ public class TestApp
 									}while (rs.next());
 
 								}
+
+								if(check2DB){
+
+									do {
+										if(!userRetweeters.containsEntry(rs2.getLong("retweeterID"),rs2.getLong("retweetedUserID"))) userRetweeters.put(rs2.getLong("retweeterID"),rs2.getLong("retweetedUserID"));
+									}while (rs2.next());
+
+								}
 							} catch (SQLException e) {
 								e.printStackTrace();
 							}
 
 							user_tweets = "insert into tweets (userID, statusID, date) values (?, ?, ?)";
+							user_retweeters = "insert into retweetertable (retweeterID, retweetedUserID, date) values (?, ?, ?)";
+
+
+
+							/////// There are duplicates in the retweetertable SQL table
+
 
 							for(Status status : tweetsUser)
 							{
@@ -190,6 +315,39 @@ public class TestApp
 										e.printStackTrace();
 									}
 								}
+
+								IDs retweeter_ids;
+								long retweeter_cursor = -1;
+
+								try {
+
+									do {
+										retweeter_ids = TwitterApi.client().tweets().getRetweeterIds(status.getId(), retweeter_cursor);
+
+										for (long retweeter_id : retweeter_ids.getIDs()) {
+											if (!userRetweeters.containsEntry(retweeter_id, id)) {
+												try {
+													ps = DB.conn().prepareStatement(user_retweeters);
+
+													ps.setLong(1, retweeter_id);
+													ps.setLong(2, id);
+													ps.setDate(3, new java.sql.Date(status.getCreatedAt().getTime()));
+
+													// execute the preparedstatement
+													ps.execute();
+												} catch (SQLException e) {
+													e.printStackTrace();
+												}
+											}
+										}
+
+									}while ((retweeter_cursor = ids.getNextCursor()) != 0);
+
+								} catch (TwitterException e) {
+
+									e.printStackTrace();
+
+								}
 							}
 
 						}
@@ -200,12 +358,6 @@ public class TestApp
 
 			}while(users.size() != 0 && counter==0);
 
-			//Map<Long, Integer> sortedMap = generalFunctions.sortByValue(amplifiers);
-
-			//for(Map.Entry<Long, Integer> entry : sortedMap.entrySet())
-			//{
-			//System.out.println(entry.getKey() + " : " + entry.getValue());
-			//}
 		}
 		catch(TwitterException te)
 		{
@@ -305,10 +457,11 @@ public class TestApp
 
 //		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
 //
-//		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
-//		Map<Long, Date> statusDate = new HashMap<Long, Date>();
+		//Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
+		//Map<Long, Date> statusDate = new HashMap<Long, Date>();
 //
-//		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
+		//Multimap<Long, Long> userTweets = ArrayListMultimap.create();
+		//Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
 
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
@@ -327,25 +480,25 @@ public class TestApp
 //			jettyServer.destroy();
 //		}
 
-//		while(true){
-//			GeneralFunctions generalFunctions = new GeneralFunctions();
-//			boolean checkLimit = generalFunctions.checkRateLimit();
-//
-//			if(checkLimit) {
-//				try {
-//					Thread.sleep(900000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//
-//			System.out.println(userRetweeterGraph.getInstance().toString());
-//
-//			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets);
-//
-//			System.out.println("all ok");
-//
-//		}
+		/*while(true){
+			GeneralFunctions generalFunctions = new GeneralFunctions();
+			boolean checkLimit = generalFunctions.checkRateLimit();
+
+			if(checkLimit) {
+				try {
+					Thread.sleep(900000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			System.out.println(userRetweeterGraph.getInstance().toString());
+
+			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets, userRetweeters);
+
+			System.out.println("all ok");
+
+		}*/
 
 
 		//testApp.showRateLimits();
@@ -355,7 +508,7 @@ public class TestApp
 
 		//generalFunctions.topUsers(stringUrl);
 
-		testApp.printUserTweetsFromGraph();
+		testApp.printCentralityResult("alpha", true);
 
 	}
 
