@@ -1,4 +1,4 @@
-package TwitterAnalytics.Sentimenter.SentimentLexicon;
+package TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon;
 
 
 import java.util.Vector;

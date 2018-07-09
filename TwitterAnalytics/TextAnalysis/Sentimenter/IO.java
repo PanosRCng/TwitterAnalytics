@@ -1,4 +1,4 @@
-package TwitterAnalytics.Sentimenter;
+package TwitterAnalytics.TextAnalysis.Sentimenter;
 
 import java.util.Vector;
 import java.io.FileInputStream;

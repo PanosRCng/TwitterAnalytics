@@ -1,4 +1,4 @@
-package TwitterAnalytics.Tokenizer;
+package TwitterAnalytics.TextAnalysis.Tokenizer;
 
 
 import java.util.HashMap;
@@ -41,6 +41,15 @@ public class Tokenizer
     {
         text = this.removeWordDividers(text);
 
+        if( this.settings.all_uppercase() )
+        {
+            text = this.uppercase(text);
+        }
+        else if( this.settings.all_lowercase() )
+        {
+            text = this.lowercase(text);
+        }
+
         if( this.settings.removePunctuations() )
         {
             text = this.removePunctuations(text);
@@ -54,15 +63,6 @@ public class Tokenizer
         if( this.settings.removeIntonations() )
         {
             text = this.removeIntonations(text);
-        }
-
-        if( this.settings.all_uppercase() )
-        {
-            text = this.uppercase(text);
-        }
-        else if( this.settings.all_lowercase() )
-        {
-            text = this.lowercase(text);
         }
 
         Vector<String> tokens = this.getTokens(text, " ");
@@ -82,17 +82,16 @@ public class Tokenizer
             tokens = this.removeMinLength(tokens, 2);
         }
 
+        /*
         System.out.println(text);
 
         for(String token : tokens)
         {
             System.out.println("|" + token + "|");
         }
+        */
 
-        //return tokens;
-
-
-        return null;
+        return tokens;
     }
 
 
@@ -191,6 +190,30 @@ public class Tokenizer
     }
 
 
+    private Vector<String> uppercase(Vector<String> tokens)
+    {
+        Vector<String> new_tonens = new Vector<>();
+
+        for(String token : tokens)
+        {
+            for(Map.Entry<String,String> lowercase_to_uppercase : this.lowercaseToUppercaseMap.entrySet())
+            {
+                String lowercase = lowercase_to_uppercase.getKey();
+                String uppercase = lowercase_to_uppercase.getValue();
+
+                if(token.contains(lowercase))
+                {
+                    token = token.replace(lowercase, uppercase);
+                }
+            }
+
+            new_tonens.add(token);
+        }
+
+        return new_tonens;
+    }
+
+
     private String lowercase(String text)
     {
         for(Map.Entry<String,String> lowercase_to_uppercase : this.lowercaseToUppercaseMap.entrySet())
@@ -202,9 +225,43 @@ public class Tokenizer
             {
                 text = text.replace(uppercase, lowercase);
             }
+
+            if(text.contains("ς"))
+            {
+                text = text.replace("ς", "σ");
+            }
         }
 
         return text;
+    }
+
+
+    private Vector<String> lowercase(Vector<String> tokens)
+    {
+        Vector<String> new_tonens = new Vector<>();
+
+        for(String token : tokens)
+        {
+            for(Map.Entry<String,String> lowercase_to_uppercase : this.lowercaseToUppercaseMap.entrySet())
+            {
+                String lowercase = lowercase_to_uppercase.getKey();
+                String uppercase = lowercase_to_uppercase.getValue();
+
+                if(token.contains(uppercase))
+                {
+                    token = token.replace(uppercase, lowercase);
+                }
+
+                if(token.contains("ς"))
+                {
+                    token = token.replace("ς", "σ");
+                }
+            }
+
+            new_tonens.add(token);
+        }
+
+        return new_tonens;
     }
 
 
@@ -274,9 +331,23 @@ public class Tokenizer
 
     private void setup()
     {
+        if( (this.settings.all_uppercase()) || (this.settings.all_lowercase()) )
+        {
+            this.lowercaseToUppercaseMap = IO.readMapFile(LOWERCASE_TO_UPPERCASE_FILE);
+        }
+
         if(this.settings.removeStopwords())
         {
             this.stopwords = IO.readFile(STOPWORDS_FILE);
+
+            if( this.settings.all_uppercase() )
+            {
+                this.stopwords = this.uppercase(this.stopwords);
+            }
+            else if( this.settings.all_lowercase() )
+            {
+                this.stopwords = this.lowercase(this.stopwords);
+            }
         }
 
         if(this.settings.removePunctuations())
@@ -292,11 +363,6 @@ public class Tokenizer
         if(this.settings.removeIntonations())
         {
             this.intonationsMap = IO.readMapFile(INTONATIONS_FILE);
-        }
-
-        if( (this.settings.all_uppercase()) || (this.settings.all_lowercase()) )
-        {
-            this.lowercaseToUppercaseMap = IO.readMapFile(LOWERCASE_TO_UPPERCASE_FILE);
         }
     }
 }
