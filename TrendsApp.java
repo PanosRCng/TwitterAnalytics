@@ -1,6 +1,7 @@
 import TwitterAnalytics.Models.Hashtag;
 import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
+import TwitterAnalytics.TextAnalysis.Utils;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TrendsResources;
@@ -123,8 +124,6 @@ public class TrendsApp
     {
         Tokenizer tokenizer = new Tokenizer();
 
-        Stemmer stemmer = new Stemmer();
-
 
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
@@ -144,7 +143,7 @@ public class TrendsApp
                 for(String token : tokens)
                 {
                     //System.out.println("|" + token + "|");
-                    System.out.println("|" + token + "|" + " <-> " + "|" + stemmer.stem(token) + "|");
+                    System.out.println("|" + token + "|" + " <-> " + "|" + Stemmer.stem( Utils.lowercase(token) ) + "|");
                 }
 
                 System.out.println("-----------------------");

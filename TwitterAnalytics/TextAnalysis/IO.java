@@ -1,4 +1,4 @@
-package TwitterAnalytics.TextAnalysis.Tokenizer;
+package TwitterAnalytics.TextAnalysis;
 
 
 import java.util.HashMap;

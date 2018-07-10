@@ -4,6 +4,8 @@ package TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon;
 import java.util.Vector;
 import java.util.HashMap;
 import TwitterAnalytics.TextAnalysis.Sentimenter.IO;
+import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
+import TwitterAnalytics.TextAnalysis.Utils;
 
 
 public class SentimentLexicon
@@ -29,10 +31,30 @@ public class SentimentLexicon
         {
             Entry entry = Entry.create(entry_parts);
 
+            entry.term = SentimentLexicon.clean_term(entry.term);
+
+            entry.term = Utils.removeIntonations(entry.term);
+            entry.term = Utils.removePunctuations(entry.term);
+            entry.term = Utils.covertSigma(entry.term);
+
+            entry.term = Stemmer.stem(entry.term);
+
             lexicon.put(entry.term, entry);
         }
 
         return new SentimentLexicon(lexicon);
+    }
+
+
+    private static String clean_term(String term)
+    {
+        String clean_term = "";
+
+        clean_term = term.split("\\s+")[0];
+
+        clean_term = clean_term.replaceAll("-", "");
+
+        return clean_term;
     }
 
 }

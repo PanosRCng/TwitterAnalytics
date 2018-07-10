@@ -1,25 +1,17 @@
 import java.util.*;
 
-import TwitterAnalytics.Models.DBModel;
-import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.Tweet;
-import TwitterAnalytics.Sentimenter.SentimentLexicon.SentimentLexicon;
-import twitter4j.RateLimitStatus;
+import TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon.SentimentLexicon;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.TwitterException;
 import twitter4j.Status;
-import twitter4j.api.TrendsResources;
 import twitter4j.api.UsersResources;
 
 import TwitterAnalytics.TwitterApi;
 import twitter4j.User;
 import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
-import twitter4j.Trends;
-
-import java.sql.Timestamp;
-
 
 
 public class TestApp

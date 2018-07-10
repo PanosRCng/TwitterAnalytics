@@ -10,8 +10,8 @@ public class Settings
     private boolean remove_numbers = true;
     private boolean remove_min_length = true;
     private boolean remove_intonations = true;
-    private boolean all_uppercase = false;
-    private boolean all_lowercase = true;
+    private boolean all_uppercase = true;
+    private boolean all_lowercase = false;
     private boolean remove_stopwords = true;
 
 
