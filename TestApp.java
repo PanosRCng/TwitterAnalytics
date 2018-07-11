@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -303,6 +305,9 @@ public class TestApp
 							{
 								if(!userTweets.containsEntry(id,status.getId())){
 									try {
+
+										userTweets.put(id,status.getId());
+
 										ps = DB.conn().prepareStatement(user_tweets);
 
 										ps.setLong    (1, id);
@@ -326,6 +331,9 @@ public class TestApp
 
 										for (long retweeter_id : retweeter_ids.getIDs()) {
 											if (!userRetweeters.containsEntry(retweeter_id, id)) {
+
+												userRetweeters.put(retweeter_id,id);
+
 												try {
 													ps = DB.conn().prepareStatement(user_retweeters);
 
@@ -455,13 +463,13 @@ public class TestApp
 
 		//generalFunctions.printTweets(2845541223L);
 
-//		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
 //
-		//Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
-		//Map<Long, Date> statusDate = new HashMap<Long, Date>();
+		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
+		Map<Long, Date> statusDate = new HashMap<Long, Date>();
 //
-		//Multimap<Long, Long> userTweets = ArrayListMultimap.create();
-		//Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
+		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
+		Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
 
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
@@ -480,7 +488,12 @@ public class TestApp
 //			jettyServer.destroy();
 //		}
 
-		/*while(true){
+		PrintStream o = new PrintStream(new File("A.txt"));
+
+		// Assign o to output stream
+		System.setOut(o);
+
+		while(true){
 			GeneralFunctions generalFunctions = new GeneralFunctions();
 			boolean checkLimit = generalFunctions.checkRateLimit();
 
@@ -496,9 +509,11 @@ public class TestApp
 
 			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets, userRetweeters);
 
-			System.out.println("all ok");
+			System.out.println("User tweets: " + userTweets.size());
+			System.out.println("UserRetweeters: " + userRetweeters.size());
+			System.out.println("all ok\n");
 
-		}*/
+		}
 
 
 		//testApp.showRateLimits();
@@ -508,7 +523,7 @@ public class TestApp
 
 		//generalFunctions.topUsers(stringUrl);
 
-		testApp.printCentralityResult("alpha", true);
+		//testApp.printCentralityResult("alpha", true);
 
 	}
 
