@@ -180,7 +180,7 @@ public class TestApp
 
 	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph,
 								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate,
-								  Multimap<Long, Long> userTweets, Multimap<Long, Long> userRetweeters)
+								  Multimap<Long, Long> userTweets, Multimap<Long, Long> userRetweeters, Paging paging)
 	{
 
 		ResponseList<User> users;
@@ -229,7 +229,7 @@ public class TestApp
 					break;
 				}
 
-				ResponseList<Status> tweets = timelinesResource.getUserTimeline(userID);
+				ResponseList<Status> tweets = timelinesResource.getUserTimeline(userID, paging);
 
 				for(Status tweet : tweets)
 				{
@@ -471,6 +471,10 @@ public class TestApp
 		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
 		Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
 
+		Paging paging;
+
+		int pageno = 1;
+
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
 //
@@ -507,7 +511,12 @@ public class TestApp
 
 			System.out.println(userRetweeterGraph.getInstance().toString());
 
-			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers, statusDate, userTweets, userRetweeters);
+			paging = new Paging(pageno++, 1000);
+
+			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers,
+					statusDate, userTweets, userRetweeters, paging);
+
+			if(pageno==1000) pageno=1;
 
 			System.out.println("User tweets: " + userTweets.size());
 			System.out.println("UserRetweeters: " + userRetweeters.size());
