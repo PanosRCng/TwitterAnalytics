@@ -179,7 +179,7 @@ public class TestApp
 	}
 
 	public void trackUserTimeLine(String query_string, UserRetweeterGraph userRetweeterGraph,
-								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate,
+								  Multimap<Long, Long> amplifiers, Map<Long, Date> statusDate, Map<Long, Long> statusPageID,
 								  Multimap<Long, Long> userTweets, Multimap<Long, Long> userRetweeters, Paging paging)
 	{
 
@@ -208,6 +208,7 @@ public class TestApp
 				do {
 					if(!amplifiers.containsEntry(rs.getLong("userID"),rs.getLong("statusID"))) amplifiers.put(rs.getLong("userID"), rs.getLong("statusID"));
 					if(!statusDate.containsKey(rs.getLong("statusID"))) statusDate.put(rs.getLong("statusID"), rs.getDate("date"));
+					if(!statusPageID.containsKey(rs.getLong("statusID"))) statusPageID.put(rs.getLong("statusID"), rs.getLong("pageID"));
 				}while (rs.next());
 
 			}
@@ -245,6 +246,9 @@ public class TestApp
 
 							if(!statusDate.containsKey(tweet.getId())){
 								statusDate.put(tweet.getId(), tweet.getCreatedAt());
+							}
+							if(!statusPageID.containsKey(tweet.getId())){
+								statusPageID.put(tweet.getId(), userID);
 							}
 							if(!amplifiers.containsEntry(id,tweet.getId())){
 								amplifiers.put(id,tweet.getId());
@@ -295,11 +299,6 @@ public class TestApp
 
 							user_tweets = "insert into tweets (userID, statusID, date) values (?, ?, ?)";
 							user_retweeters = "insert into retweetertable (retweeterID, retweetedUserID, date) values (?, ?, ?)";
-
-
-
-							/////// There are duplicates in the retweetertable SQL table
-
 
 							for(Status status : tweetsUser)
 							{
@@ -395,7 +394,7 @@ public class TestApp
 
 						preparedStmt.setLong    (1, key);
 						preparedStmt.setLong    (2, value);
-						preparedStmt.setLong    (3, userID);
+						preparedStmt.setLong    (3, statusPageID.get(value));
 						preparedStmt.setDate    (4, new java.sql.Date(statusDate.get(value).getTime()));
 
 						preparedStmt.addBatch();
@@ -467,13 +466,14 @@ public class TestApp
 //
 		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
 		Map<Long, Date> statusDate = new HashMap<Long, Date>();
+		Map<Long, Long> statusPageID = new HashMap<Long, Long>();
 //
 		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
 		Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
 
 		Paging paging;
 
-		int pageno = 1;
+		int pageno;
 
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
@@ -491,6 +491,13 @@ public class TestApp
 //		} finally {
 //			jettyServer.destroy();
 //		}
+
+		Map<String, Integer> users = new HashMap();
+		users.put("@Eurohoopsnet", 1);
+		users.put("@sport24", 1);
+		users.put("@EuroLeague", 1);
+
+		Iterator<Map.Entry<String, Integer>> iter = users.entrySet().iterator();
 
 		PrintStream o = new PrintStream(new File("A.txt"));
 
@@ -511,12 +518,20 @@ public class TestApp
 
 			System.out.println(userRetweeterGraph.getInstance().toString());
 
+			Map.Entry<String, Integer> pair = iter.next();
+
+			pageno = pair.getValue();
+
 			paging = new Paging(pageno++, 1000);
 
-			testApp.trackUserTimeLine("@Eurohoopsnet", userRetweeterGraph, amplifiers,
-					statusDate, userTweets, userRetweeters, paging);
+			testApp.trackUserTimeLine(pair.getKey(), userRetweeterGraph, amplifiers,
+					statusDate, statusPageID, userTweets, userRetweeters, paging);
 
 			if(pageno==1000) pageno=1;
+
+			users.put(pair.getKey(), pageno);
+
+			if(!iter.hasNext()) iter = users.entrySet().iterator();
 
 			System.out.println("User tweets: " + userTweets.size());
 			System.out.println("UserRetweeters: " + userRetweeters.size());
