@@ -1,12 +1,15 @@
 package TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon;
 
 
+import java.util.HashMap;
 import java.util.Vector;
 
 
 
 public class Entry
 {
+    private HashMap<String, String[]> groups;
+
 
     public String term;
 
@@ -68,7 +71,7 @@ public class Entry
 
     public Entry()
     {
-
+        //
     }
 
 
@@ -133,7 +136,107 @@ public class Entry
         entry.comments3 = parts.get(43);
         entry.comments4 = parts.get(44);
 
+        entry.groups = entry.create_group();
+
         return entry;
+    }
+
+
+    public double anger()
+    {
+        return this.mean( this.numeric_group_elements("anger") );
+    }
+
+
+    public double disgust()
+    {
+        return this.mean( this.numeric_group_elements("disgust") );
+    }
+
+
+    public double fear()
+    {
+        return this.mean( this.numeric_group_elements("fear") );
+    }
+
+    public double happiness()
+    {
+        return this.mean( this.numeric_group_elements("happiness") );
+    }
+
+
+    public double sadness()
+    {
+        return this.mean( this.numeric_group_elements("sadness") );
+    }
+
+
+    public double surpise()
+    {
+        return this.mean( this.numeric_group_elements("surprise") );
+    }
+
+
+    private HashMap<String, String[]> create_group()
+    {
+        groups = new HashMap<>();
+
+        groups.put("anger", new String[] {this.anger1, this.anger2, this.anger3, this.anger4} );
+        groups.put("disgust", new String[] {this.disgust1, this.disgust2, this.disgust3, this.disgust4} );
+        groups.put("fear", new String[] {this.fear1, this.fear2, this.fear3, this.fear4} );
+        groups.put("happiness", new String[] {this.happiness1, this.happiness2, this.happiness3, this.happiness4} );
+        groups.put("sadness", new String[] {this.sadness1, this.sadness2, this.sadness3, this.sadness4} );
+        groups.put("surprise", new String[] {this.surprise1, this.surprise2, this.surprise3, this.surprise4} );
+
+        return groups;
+    }
+
+
+    private Vector<Double> numeric_group_elements(String group)
+    {
+        Vector<Double> elements = new Vector<>();
+
+        for(String element : this.groups.get(group))
+        {
+            if( this.isNumeric(element) )
+            {
+                elements.add( Double.parseDouble(element) );
+            }
+        }
+
+        return elements;
+    }
+
+
+    private double mean(Vector<Double> numbers)
+    {
+        if(numbers.size() == 0)
+        {
+            return 0.0;
+        }
+
+        double sum = 0.0;
+
+        for(double a : numbers)
+        {
+            sum += a;
+        }
+
+        return sum / numbers.size();
+    }
+
+
+    private boolean isNumeric(String str)
+    {
+        try
+        {
+            double d = Double.parseDouble(str);
+        }
+        catch(NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
     }
 
 }

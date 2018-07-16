@@ -1,7 +1,6 @@
 import java.util.*;
 
 import TwitterAnalytics.Models.Tweet;
-import TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon.SentimentLexicon;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.TwitterException;
@@ -139,16 +138,12 @@ public class TestApp
 	public static void main(String[] args)
 	{
 		//TestApp testApp = new TestApp();
-		//testApp.showRateLimits();
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
 		//TestApp2 testApp2 = new TestApp2();
 
 		TrendsApp trendsApp = new TrendsApp();
-
-
-		//SentimentLexicon sentimentLexicon = SentimentLexicon.load();
 
 
 		System.out.println("all ok");

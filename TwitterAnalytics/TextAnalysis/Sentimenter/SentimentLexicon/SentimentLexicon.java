@@ -35,14 +35,20 @@ public class SentimentLexicon
 
             entry.term = Utils.removeIntonations(entry.term);
             entry.term = Utils.removePunctuations(entry.term);
-            entry.term = Utils.covertSigma(entry.term);
 
+            entry.term = Utils.lowercase(entry.term);
             entry.term = Stemmer.stem(entry.term);
 
             lexicon.put(entry.term, entry);
         }
 
         return new SentimentLexicon(lexicon);
+    }
+
+
+    public Entry entry(String token)
+    {
+        return this.lexicon.get(token);
     }
 
 

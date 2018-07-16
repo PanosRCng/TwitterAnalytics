@@ -1,4 +1,5 @@
 import TwitterAnalytics.Models.Hashtag;
+import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
 import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
 import TwitterAnalytics.TextAnalysis.Utils;
@@ -127,32 +128,44 @@ public class TrendsApp
 
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
+            /*
             System.out.println("----------------------- ------------------------------------");
 
             System.out.println(trend.name);
-
+            */
 
             for(TwitterAnalytics.Models.Tweet tweet : trend.tweets())
             {
-                System.out.println("-----------------------");
 
-                System.out.println(tweet.text);
+                //System.out.println("-----------------------");
+                //System.out.println(tweet.text);
 
                 Vector<String> tokens = tokenizer.tokenize(tweet.clean_text);
 
+                Vector<String> stems = Stemmer.stem( Utils.lowercase(tokens) );
+
+
+                Vector<Double> sentiments = Sentimenter.sentimentVector( stems );
+
+
+
+                /*
                 for(String token : tokens)
                 {
-                    //System.out.println("|" + token + "|");
                     System.out.println("|" + token + "|" + " <-> " + "|" + Stemmer.stem( Utils.lowercase(token) ) + "|");
                 }
 
-                System.out.println("-----------------------");
-                System.out.println("-----------------------");
+                for(String stem_token : stem_tokens)
+                {
+                    System.out.println("|" + stem_token + "|");
+                }
+                */
 
-                //break;
+                //System.out.println("-----------------------");
+                //System.out.println("-----------------------");
+
             }
 
-            //break;
         }
 
     }
