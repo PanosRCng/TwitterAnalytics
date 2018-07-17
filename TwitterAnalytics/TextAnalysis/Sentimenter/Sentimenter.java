@@ -1,7 +1,6 @@
 package TwitterAnalytics.TextAnalysis.Sentimenter;
 
 
-import java.util.HashMap;
 import java.util.Vector;
 
 import TwitterAnalytics.TextAnalysis.Sentimenter.SentimentLexicon.Entry;
@@ -50,32 +49,62 @@ public class Sentimenter
     }
 
 
-    public Vector<Double> t_vector(Vector<String> tokens)
+    public static Vector<Double> trendVector(Vector<Vector<Double>> t_matrix)
+    {
+        Vector<Double> h_vector = new Vector<>();
+
+        for(int i=0; i<6; i++)
+        {
+            Vector<Double> parts = new Vector<>();
+
+            for(Vector<Double> t_vector : t_matrix)
+            {
+                parts.add( t_vector.get(i) );
+            }
+
+            h_vector.add( SingletonHelper.INSTANCE.quadtratic_mean(parts) );
+        }
+
+        return h_vector;
+    }
+
+
+    private Vector<Double> t_vector(Vector<String> tokens)
     {
         Vector<Double> t_vector = new Vector<>();
 
-        HashMap<String,Vector<Double>> w_matrix = this.w_matrix(tokens);
+        Vector<Vector<Double>> w_matrix = this.w_matrix(tokens);
 
+        for(int i=0; i<6; i++)
+        {
+            Vector<Double> parts = new Vector<>();
 
+            for(Vector<Double> w_vector : w_matrix)
+            {
+                parts.add( w_vector.get(i) );
+            }
+
+            t_vector.add( this.quadtratic_mean(parts) );
+        }
 
         return t_vector;
     }
 
 
-    public HashMap<String,Vector<Double>> w_matrix(Vector<String> tokens)
+    private Vector<Vector<Double>> w_matrix(Vector<String> tokens)
     {
-        HashMap<String,Vector<Double>> matrix = new HashMap<String, Vector<Double>>();
+        Vector<Vector<Double>> matrix = new Vector<>();
 
         for(String token : tokens)
         {
-            matrix.put(token, this.w_vector(token));
+            matrix.add(this.w_vector(token));
         }
 
         return matrix;
     }
 
 
-    public Vector<Double> w_vector(String token)
+    private Vector<Double> w_vector(String token)
     {
         Vector<Double> vector = new Vector<>();
 
@@ -89,6 +118,19 @@ public class Sentimenter
         vector.add( entry.surpise() );
 
         return vector;
+    }
+
+
+    private Double quadtratic_mean(Vector<Double> numbers)
+    {
+        Double sum = 0.0;
+
+        for(Double number : numbers)
+        {
+            sum += Math.pow(number, 2);
+        }
+
+        return Math.sqrt( (sum / numbers.size()) );
     }
 
 }

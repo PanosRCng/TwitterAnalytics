@@ -7,10 +7,7 @@ import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TrendsResources;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class TrendsApp
 {
@@ -128,11 +125,13 @@ public class TrendsApp
 
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
-            /*
+
             System.out.println("----------------------- ------------------------------------");
 
             System.out.println(trend.name);
-            */
+
+
+            Vector<Vector<Double>> t_matrix = new Vector<>();
 
             for(TwitterAnalytics.Models.Tweet tweet : trend.tweets())
             {
@@ -145,9 +144,14 @@ public class TrendsApp
                 Vector<String> stems = Stemmer.stem( Utils.lowercase(tokens) );
 
 
-                Vector<Double> sentiments = Sentimenter.sentimentVector( stems );
+                Vector<Double> t_vector = Sentimenter.sentimentVector( stems );
 
+                if(t_vector == null)
+                {
+                    continue;
+                }
 
+                t_matrix.add( t_vector );
 
                 /*
                 for(String token : tokens)
@@ -166,6 +170,14 @@ public class TrendsApp
 
             }
 
+            if(t_matrix.size() == 0)
+            {
+                continue;
+            }
+
+            Vector<Double> s = Sentimenter.trendVector(t_matrix);
+
+            System.out.println(s.get(0) + ", " + s.get(1) + ", " + s.get(2) + ", " + s.get(3) + ", " + s.get(4) + ", " + s.get(5));
         }
 
     }
