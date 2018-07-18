@@ -12,7 +12,6 @@ import org.jgrapht.alg.scoring.AlphaCentrality;
 import org.jgrapht.alg.scoring.BetweennessCentrality;
 import org.jgrapht.alg.scoring.ClosenessCentrality;
 import org.jgrapht.alg.scoring.HarmonicCentrality;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 import twitter4j.*;
@@ -20,6 +19,7 @@ import twitter4j.*;
 import TwitterAnalytics.TwitterApi;
 import TwitterAnalytics.DB;
 import twitter4j.api.TimelinesResources;
+import twitter4j.api.TweetsResources;
 import twitter4j.api.UsersResources;
 
 public class TestApp
@@ -39,16 +39,13 @@ public class TestApp
 
 			while (rs.next()) {
 
-				boolean flag = false;
 				if (!graph.getInstance().containsVertex(rs.getLong("retweeterID"))) {
 					graph.getInstance().addVertex(rs.getLong("retweeterID"));
-					flag = true;
 				}
 				if (!graph.getInstance().containsVertex(rs.getLong("retweetedUserID"))) {
 					graph.getInstance().addVertex(rs.getLong("retweetedUserID"));
-					flag = true;
 				}
-				if (flag == true) graph.getInstance().addEdge(rs.getLong("retweeterID"), rs.getLong("retweetedUserID"));
+				graph.getInstance().addEdge(rs.getLong("retweeterID"), rs.getLong("retweetedUserID"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -94,7 +91,7 @@ public class TestApp
 				UsersResources userResource = TwitterApi.client().users();
 
 				Iterator iter = map.entrySet().iterator();
-				iter.next();
+
 				Map.Entry<Long, Double> entry = (Map.Entry<Long, Double>) iter.next();
 
 				Long key = entry.getKey();
@@ -111,7 +108,6 @@ public class TestApp
 					System.out.println("Number of edges: " + userTweets.size());
 					System.out.println("Location : " + user.getLocation());
 
-					break;
 				}
 			}
 			catch(TwitterException twitterException)
@@ -120,6 +116,52 @@ public class TestApp
 				System.out.println("Failed : " + twitterException.getMessage());
 			}
 
+		}
+
+		UsersResources userResource = TwitterApi.client().users();
+		TweetsResources tweetResource = TwitterApi.client().tweets();
+
+		int counter = 1;
+
+		for (Map.Entry<Long, Double> entry : map.entrySet())
+		{
+
+			ResponseList<User> users = null;
+			try {
+				users = userResource.lookupUsers(entry.getKey());
+
+				for(User user : users)
+				{
+
+					String user_tweets = "select * from tweets where userID="+user.getId();
+
+					try {
+						preparedStmt = DB.conn().prepareStatement(user_tweets);
+
+						ResultSet rs = preparedStmt.executeQuery();
+
+						while (rs.next()) {
+
+							ResponseList<Status> tweets = tweetResource.lookup(rs.getLong("statusID"));
+
+							for(Status tweet : tweets)
+							{
+								System.out.println(tweet.getText());
+								System.out.println(tweet.getCreatedAt());
+								System.out.println(tweet.getWithheldInCountries());
+							}
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+
+				}
+
+			} catch (TwitterException e) {
+				e.printStackTrace();
+			}
+
+			if(counter++==10) break;
 		}
 	}
 
@@ -462,7 +504,7 @@ public class TestApp
 
 		//generalFunctions.printTweets(2845541223L);
 
-		UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
+		/*UserRetweeterGraph userRetweeterGraph = new UserRetweeterGraph();
 //
 		Multimap<Long, Long> amplifiers = ArrayListMultimap.create();
 		Map<Long, Date> statusDate = new HashMap<Long, Date>();
@@ -473,7 +515,7 @@ public class TestApp
 
 		Paging paging;
 
-		int pageno;
+		int pageno;*/
 
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
@@ -492,7 +534,7 @@ public class TestApp
 //			jettyServer.destroy();
 //		}
 
-		Map<String, Integer> users = new HashMap();
+		/*Map<String, Integer> users = new HashMap();
 		users.put("@Eurohoopsnet", 1);
 		users.put("@sport24", 1);
 		users.put("@EuroLeague", 1);
@@ -537,7 +579,7 @@ public class TestApp
 			System.out.println("UserRetweeters: " + userRetweeters.size());
 			System.out.println("all ok\n");
 
-		}
+		}*/
 
 
 		//testApp.showRateLimits();
@@ -547,7 +589,7 @@ public class TestApp
 
 		//generalFunctions.topUsers(stringUrl);
 
-		//testApp.printCentralityResult("alpha", true);
+		testApp.printCentralityResult("alpha", false);
 
 	}
 
