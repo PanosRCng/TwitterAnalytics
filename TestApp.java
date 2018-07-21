@@ -141,8 +141,6 @@ public class TestApp
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
-		//TestApp2 testApp2 = new TestApp2();
-
 		TrendsApp trendsApp = new TrendsApp();
 
 
