@@ -494,12 +494,11 @@ public class TestApp
 		}
 	}
 
-	public static void main(String[] args) throws Exception
-	{
+	public void myCode(){
 
 		//StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@Eurohoopsnet");
 
-		TestApp testApp = new TestApp();
+		//TestApp testApp = new TestApp();
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 
 		//generalFunctions.printTweets(2845541223L);
@@ -589,7 +588,13 @@ public class TestApp
 
 		//generalFunctions.topUsers(stringUrl);
 
-		testApp.printCentralityResult("alpha", false);
+		//testApp.printCentralityResult("alpha", false);
+
+	}
+
+	public static void main(String[] args) throws Exception
+	{
+
 
 	}
 
