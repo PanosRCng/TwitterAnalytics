@@ -2,9 +2,11 @@ package TwitterAnalytics;
 
 
 import TwitterAnalytics.ConfigManager.Config;
-import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.TwitterFactory;
-import twitter4j.Twitter;
+
+import twitter4j.*;
+
+import java.util.Map;
+import java.util.Vector;
 
 public class TwitterApi
 {
@@ -38,6 +40,93 @@ public class TwitterApi
     public static Twitter client()
     {
         return SingletonHelper.INSTANCE.twitter;
+    }
+
+    public static void showRateLimits()
+    {
+        try
+        {
+            Map<String, RateLimitStatus> limits = TwitterApi.client().getRateLimitStatus();
+
+            for(Map.Entry<String, RateLimitStatus> entry : limits.entrySet())
+            {
+                System.out.println(entry.getKey() + " : " + entry.getValue());
+            }
+        }
+        catch(TwitterException twitterException)
+        {
+            twitterException.printStackTrace();
+            System.out.println("Failed : " + twitterException.getMessage());
+        }
+    }
+
+
+    public static boolean rateLimitsExided()
+    {
+        try
+        {
+            Map<String ,RateLimitStatus> rateLimit = TwitterApi.client().getRateLimitStatus();
+
+            for(String timeStatus : rateLimit.keySet())
+            {
+                RateLimitStatus timeLeft = rateLimit.get(timeStatus);
+
+                if(timeLeft != null && timeLeft.getRemaining() == 0)
+                {
+                    System.err.println("Rate limit exceeded!!!");
+
+                    return true;
+                }
+            }
+
+        }
+        catch(TwitterException twitterException)
+        {
+            twitterException.printStackTrace();
+            System.out.println("Failed : " + twitterException.getMessage());
+        }
+
+        return false;
+    }
+
+
+    public static String cleanTweetText(Status tweet)
+    {
+        Vector<String> to_remove = new Vector<>();
+
+        for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
+        {
+            to_remove.add( "#" + hashtagEntity.getText() );
+        }
+
+        for(UserMentionEntity userMentionEntity : tweet.getUserMentionEntities())
+        {
+            to_remove.add( "@" + userMentionEntity.getScreenName() );
+        }
+
+        for(URLEntity urlEntity : tweet.getURLEntities())
+        {
+            to_remove.add( urlEntity.getText() );
+        }
+
+        for(MediaEntity mediaEntity : tweet.getMediaEntities())
+        {
+            to_remove.add( mediaEntity.getText() );
+        }
+
+        for(SymbolEntity symbolEntity : tweet.getSymbolEntities())
+        {
+            to_remove.add( symbolEntity.getText() );
+        }
+
+        String text = tweet.getText();
+
+        for(String d : to_remove)
+        {
+            text = text.replace(d, " ");
+        }
+
+        return text;
     }
 
 }

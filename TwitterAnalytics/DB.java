@@ -1,9 +1,6 @@
 package TwitterAnalytics;
 
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 import TwitterAnalytics.ConfigManager.Config;
 
@@ -21,6 +18,7 @@ public class DB
 
         String url = "jdbc:mysql://" + Config.database().DATABASE_SERVER + ":" +
                 Config.database().DATABASE_PORT + "/" + Config.database().DATABASE_NAME+"?rewriteBatchedStatements=true";
+        String url = "jdbc:mysql://" + Config.database().DATABASE_SERVER + ":" + Config.database().DATABASE_PORT + "/" + Config.database().DATABASE_NAME;
 
         try
         {
@@ -46,5 +44,131 @@ public class DB
         return SingletonHelper.INSTANCE.conn;
     }
 
+    public static ResultSet query(String query)
+    {
+        try
+        {
+            ResultSet resultSet = DB.conn().createStatement().executeQuery(query);
+
+            if(!resultSet.next())
+            {
+                return null;
+            }
+
+            return resultSet;
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return null;
+    }
+
+
+    public static int insert(String query)
+    {
+        try
+        {
+            Statement stmt = DB.conn().createStatement();
+
+            stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+
+            ResultSet resultSet = stmt.getGeneratedKeys();
+
+            if(resultSet.next())
+            {
+                return resultSet.getInt(1);
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return -1;
+    }
+
+
+    public static int insert(PreparedStatement stmt)
+    {
+        try
+        {
+            stmt.executeUpdate();
+
+            ResultSet resultSet = stmt.getGeneratedKeys();
+
+            if(resultSet.next())
+            {
+                return resultSet.getInt(1);
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return -1;
+    }
+
+
+    public static boolean update(String query)
+    {
+        try
+        {
+            int affected_rows = DB.conn().createStatement().executeUpdate(query);
+
+            if(affected_rows == 1)
+            {
+                return true;
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return false;
+    }
+
+
+    public static boolean update(PreparedStatement stmt)
+    {
+        try
+        {
+            int affected_rows = stmt.executeUpdate();
+
+            if(affected_rows == 1)
+            {
+                return true;
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return false;
+    }
+
+
+    public static boolean delete(String query)
+    {
+        try
+        {
+            int affected_rows = DB.conn().createStatement().executeUpdate(query);
+
+            if(affected_rows == 1)
+            {
+                return true;
+            }
+        }
+        catch(SQLException ex)
+        {
+            System.out.println(ex);
+        }
+
+        return false;
+    }
 
 }

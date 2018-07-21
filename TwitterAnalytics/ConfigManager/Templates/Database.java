@@ -17,4 +17,5 @@ public class Database extends Settings
     {
         //
     }
+
 }
