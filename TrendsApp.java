@@ -9,27 +9,70 @@ import twitter4j.api.TrendsResources;
 
 import java.util.*;
 
-public class TrendsApp
+
+
+public class TrendsApp implements RateLimitStatusListener
 {
 
 
     public TrendsApp()
     {
-        //this.collect();
+        TwitterApi.client().addRateLimitStatusListener(this);
+        this.collect();
 
-        this.analysis();
+        //this.analysis();
+    }
+
+
+    public void onRateLimitReached(RateLimitStatusEvent event)
+    {
+        System.out.println("Rate limite reached, app will back off now");
+
+        this.backoff();
+    }
+
+
+    public void onRateLimitStatus(RateLimitStatusEvent event)
+    {
+        //
     }
 
 
     public void collect()
     {
-        this.getTrends(23424833, 10, 10);
+        while(true)
+        {
+            this.getTrends(23424833, 10, 100);
+
+            this.wait(1);
+        }
     }
 
 
     public void analysis()
     {
         this.trend_analysis();
+    }
+
+
+    private void backoff()
+    {
+        this.wait(1);
+
+        this.collect();
+    }
+
+
+    private void wait(int minutes)
+    {
+        try
+        {
+            Thread.sleep(minutes * 60 *1000);
+        }
+        catch(InterruptedException ex)
+        {
+            System.out.println("Sleep interrupted");
+        }
     }
 
 
@@ -177,7 +220,12 @@ public class TrendsApp
 
             Vector<Double> s = Sentimenter.trendVector(t_matrix);
 
-            System.out.println(s.get(0) + ", " + s.get(1) + ", " + s.get(2) + ", " + s.get(3) + ", " + s.get(4) + ", " + s.get(5));
+            System.out.println("anger: " + s.get(0));
+            System.out.println("disgust: " + s.get(1));
+            System.out.println("fear: " + s.get(2));
+            System.out.println("happiness: " + s.get(3));
+            System.out.println("sadness: " + s.get(4));
+            System.out.println("surprise: " + s.get(5));
         }
 
     }
