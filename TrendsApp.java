@@ -174,7 +174,7 @@ public class TrendsApp implements RateLimitStatusListener
             System.out.println(trend.name);
 
 
-            Vector<Vector<Double>> t_matrix = new Vector<>();
+            Vector<Vector<Double>> t_matrix = new Vector<Vector<Double>>();
 
             for(TwitterAnalytics.Models.Tweet tweet : trend.tweets())
             {

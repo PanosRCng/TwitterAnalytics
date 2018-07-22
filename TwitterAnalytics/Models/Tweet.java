@@ -48,7 +48,7 @@ public class Tweet extends DBModel
 
     public static ArrayList<Tweet> all()
     {
-        ArrayList<Tweet> tweets = new ArrayList<>();
+        ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
         for(DBModel dbModel : new Tweet().all_ids())
         {

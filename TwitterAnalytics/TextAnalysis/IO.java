@@ -20,7 +20,7 @@ public class IO
 
     public static Vector<String> readFile(String filename)
     {
-        Vector<String> lines = new Vector<>();
+        Vector<String> lines = new Vector<String>();
 
         try
         {
@@ -48,7 +48,7 @@ public class IO
 
     public static HashMap<String, String> readMapFile(String filename)
     {
-        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> map = new HashMap<String, String>();
 
         try
         {

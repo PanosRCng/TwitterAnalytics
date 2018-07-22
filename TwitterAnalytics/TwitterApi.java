@@ -4,6 +4,7 @@ package TwitterAnalytics;
 import TwitterAnalytics.ConfigManager.Config;
 
 import twitter4j.*;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.Map;
 import java.util.Vector;
@@ -92,7 +93,7 @@ public class TwitterApi
 
     public static String cleanTweetText(Status tweet)
     {
-        Vector<String> to_remove = new Vector<>();
+        Vector<String> to_remove = new Vector<String>();
 
         for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
         {

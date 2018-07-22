@@ -103,20 +103,20 @@ public class GeneralFunctions {
     }
 
 
-    public static Map<Long, Double>sortByValue(Map<Long, Double> unsortMap) {
+    public static Map<Object, Double>sortByValue(Map<Object, Double> unsortMap) {
 
-        List<Map.Entry<Long, Double>> list =
-                new LinkedList<Map.Entry<Long, Double>>(unsortMap.entrySet());
+        List<Map.Entry<Object, Double>> list =
+                new LinkedList<Map.Entry<Object, Double>>(unsortMap.entrySet());
 
-        Collections.sort(list, new Comparator<Map.Entry<Long, Double>>() {
-            public int compare(Map.Entry<Long, Double> o1,
-                               Map.Entry<Long, Double> o2) {
+        Collections.sort(list, new Comparator<Map.Entry<Object, Double>>() {
+            public int compare(Map.Entry<Object, Double> o1,
+                               Map.Entry<Object, Double> o2) {
                 return (o2.getValue()).compareTo(o1.getValue());
             }
         });
 
-        Map<Long, Double> sortedMap = new LinkedHashMap<Long, Double>();
-        for (Map.Entry<Long, Double> entry : list) {
+        Map<Object, Double> sortedMap = new LinkedHashMap<Object, Double>();
+        for (Map.Entry<Object, Double> entry : list) {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
 

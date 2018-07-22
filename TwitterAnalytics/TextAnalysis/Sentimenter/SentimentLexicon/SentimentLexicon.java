@@ -25,7 +25,7 @@ public class SentimentLexicon
 
     public static SentimentLexicon load()
     {
-        HashMap<String, Entry> lexicon = new HashMap<>();
+        HashMap<String, Entry> lexicon = new HashMap<String, Entry>();
 
         for(Vector<String> entry_parts : IO.readFile(SENTIMENT_LEXICON_FILE))
         {

@@ -44,7 +44,7 @@ public class Utils
             SingletonHelper.INSTANCE.stopwords = IO.readFile(STOPWORDS_FILE);
         }
 
-        Vector<String> new_tokens = new Vector<>();
+        Vector<String> new_tokens = new Vector<String>();
 
         for(String token : tokens)
         {
@@ -144,7 +144,7 @@ public class Utils
 
     public static Vector<String> removeNumbers(Vector<String> tokens)
     {
-        Vector<String> new_tokens = new Vector<>();
+        Vector<String> new_tokens = new Vector<String>();
 
         for(String token : tokens)
         {
@@ -164,7 +164,7 @@ public class Utils
 
     public static Vector<String> removeMinLength(Vector<String>tokens, int length)
     {
-        Vector<String> new_tokens = new Vector<>();
+        Vector<String> new_tokens = new Vector<String>();
 
         for(String token : tokens)
         {
@@ -234,7 +234,7 @@ public class Utils
             SingletonHelper.INSTANCE.lowercaseToUppercaseMap = IO.readMapFile(LOWERCASE_TO_UPPERCASE_FILE);
         }
 
-        Vector<String> new_tonens = new Vector<>();
+        Vector<String> new_tonens = new Vector<String>();
 
         for(String token : tokens)
         {
@@ -265,7 +265,7 @@ public class Utils
             SingletonHelper.INSTANCE.lowercaseToUppercaseMap = IO.readMapFile(LOWERCASE_TO_UPPERCASE_FILE);
         }
 
-        Vector<String> new_tonens = new Vector<>();
+        Vector<String> new_tonens = new Vector<String>();
 
         for(String token : tokens)
         {

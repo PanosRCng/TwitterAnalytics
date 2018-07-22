@@ -78,7 +78,7 @@ public class Tokenizer
 
     private Vector<String> getTokens(String text, String delimeter)
     {
-        Vector<String> tokens = new Vector<>();
+        Vector<String> tokens = new Vector<String>();
 
         for(String part : text.split(delimeter))
         {

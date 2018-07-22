@@ -179,7 +179,7 @@ public class Entry
 
     private HashMap<String, String[]> create_group()
     {
-        groups = new HashMap<>();
+        groups = new HashMap<String, String[]>();
 
         groups.put("anger", new String[] {this.anger1, this.anger2, this.anger3, this.anger4} );
         groups.put("disgust", new String[] {this.disgust1, this.disgust2, this.disgust3, this.disgust4} );
@@ -194,7 +194,7 @@ public class Entry
 
     private Vector<Double> numeric_group_elements(String group)
     {
-        Vector<Double> elements = new Vector<>();
+        Vector<Double> elements = new Vector<Double>();
 
         for(String element : this.groups.get(group))
         {

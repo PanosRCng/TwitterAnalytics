@@ -18,7 +18,7 @@ public class IO
 
     public static Vector<Vector<String>> readFile(String filename)
     {
-        Vector<Vector<String>> lines = new Vector<>();
+        Vector<Vector<String>> lines = new Vector<Vector<String>>();
 
         try
         {
@@ -46,7 +46,7 @@ public class IO
 
     private static Vector<String> parseTSVLine(String tsv_line)
     {
-        Vector<String> parts = new Vector<>();
+        Vector<String> parts = new Vector<String>();
 
         for(String part : tsv_line.split("\t"))
         {

@@ -31,7 +31,7 @@ public class Trend extends DBModel
 
     public ArrayList<Tweet> tweets()
     {
-        ArrayList<Tweet> tweets = new ArrayList<>();
+        ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
         for(DBModel dbModel : new Tweet().all_ids("trend_id=" + this.entry_id))
         {
@@ -44,7 +44,7 @@ public class Trend extends DBModel
 
     public ArrayList<Hashtag> hashtags()
     {
-        ArrayList<Hashtag> hashtags = new ArrayList<>();
+        ArrayList<Hashtag> hashtags = new ArrayList<Hashtag>();
 
         for(DBModel dbModel : new Hashtag().all_ids("trend_id=" + this.entry_id))
         {
@@ -58,7 +58,7 @@ public class Trend extends DBModel
 
     public static ArrayList<Trend> all()
     {
-        ArrayList<Trend> trends = new ArrayList<>();
+        ArrayList<Trend> trends = new ArrayList<Trend>();
 
         for(DBModel dbModel : new Trend().all_ids())
         {

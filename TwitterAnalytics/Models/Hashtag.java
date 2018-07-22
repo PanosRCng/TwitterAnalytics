@@ -32,7 +32,7 @@ public class Hashtag extends DBModel
 
     public static ArrayList<Hashtag> all()
     {
-        ArrayList<Hashtag> hashtags = new ArrayList<>();
+        ArrayList<Hashtag> hashtags = new ArrayList<Hashtag>();
 
         for(DBModel dbModel : new Hashtag().all_ids())
         {

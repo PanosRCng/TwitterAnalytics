@@ -37,7 +37,7 @@ public class Stemmer
 
     public static Vector<String> stem(Vector<String> tokens)
     {
-        Vector<String> stem_tokens = new Vector<>();
+        Vector<String> stem_tokens = new Vector<String>();
 
         for(String token : tokens)
         {

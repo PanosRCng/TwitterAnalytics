@@ -30,7 +30,7 @@ public class Sentimenter
 
     public static Vector<Double> sentimentVector(Vector<String> tokens)
     {
-        Vector<String> found_tokens = new Vector<>();
+        Vector<String> found_tokens = new Vector<String>();
 
         for(String token : tokens)
         {
@@ -51,11 +51,11 @@ public class Sentimenter
 
     public static Vector<Double> trendVector(Vector<Vector<Double>> t_matrix)
     {
-        Vector<Double> h_vector = new Vector<>();
+        Vector<Double> h_vector = new Vector<Double>();
 
         for(int i=0; i<6; i++)
         {
-            Vector<Double> parts = new Vector<>();
+            Vector<Double> parts = new Vector<Double>();
 
             for(Vector<Double> t_vector : t_matrix)
             {
@@ -71,13 +71,13 @@ public class Sentimenter
 
     private Vector<Double> t_vector(Vector<String> tokens)
     {
-        Vector<Double> t_vector = new Vector<>();
+        Vector<Double> t_vector = new Vector<Double>();
 
         Vector<Vector<Double>> w_matrix = this.w_matrix(tokens);
 
         for(int i=0; i<6; i++)
         {
-            Vector<Double> parts = new Vector<>();
+            Vector<Double> parts = new Vector<Double>();
 
             for(Vector<Double> w_vector : w_matrix)
             {
@@ -93,7 +93,7 @@ public class Sentimenter
 
     private Vector<Vector<Double>> w_matrix(Vector<String> tokens)
     {
-        Vector<Vector<Double>> matrix = new Vector<>();
+        Vector<Vector<Double>> matrix = new Vector<Vector<Double>>();
 
         for(String token : tokens)
         {
@@ -106,7 +106,7 @@ public class Sentimenter
 
     private Vector<Double> w_vector(String token)
     {
-        Vector<Double> vector = new Vector<>();
+        Vector<Double> vector = new Vector<Double>();
 
         Entry entry = this.sentimentLexicon.entry(token);
 

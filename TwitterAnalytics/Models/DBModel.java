@@ -21,7 +21,7 @@ public class DBModel
 
     public ArrayList<DBModel> all_ids()
     {
-        ArrayList<DBModel> models = new ArrayList<>();
+        ArrayList<DBModel> models = new ArrayList<DBModel>();
 
         try
         {
@@ -48,7 +48,7 @@ public class DBModel
 
     public ArrayList<DBModel> all_ids(String where)
     {
-        ArrayList<DBModel> models = new ArrayList<>();
+        ArrayList<DBModel> models = new ArrayList<DBModel>();
 
         try
         {
@@ -400,12 +400,12 @@ public class DBModel
 
             if(field.getType() == int.class)
             {
-                preStmt.setInt(index, (int)field.get(this));
+                preStmt.setInt(index, (Integer)field.get(this));
             }
 
             if(field.getType() == long.class)
             {
-                preStmt.setLong(index, (long)field.get(this));
+                preStmt.setLong(index, (Long)field.get(this));
             }
 
             return preStmt;
@@ -434,7 +434,7 @@ public class DBModel
 
     private HashMap<String,Field> fields()
     {
-        HashMap<String,Field> fields = new HashMap<>();
+        HashMap<String,Field> fields = new HashMap<String,Field>();
 
         try
         {
@@ -454,7 +454,7 @@ public class DBModel
 
     private HashMap<String,Field> atrribute_fields()
     {
-        HashMap<String,Field> fields = new HashMap<>();
+        HashMap<String,Field> fields = new HashMap<String,Field>();
 
         try
         {
@@ -514,7 +514,7 @@ public class DBModel
     {
         try
         {
-            return (boolean) this.fields().get("timestamps").get(this);
+            return (Boolean) this.fields().get("timestamps").get(this);
         }
         catch(Exception ex)
         {
@@ -527,7 +527,7 @@ public class DBModel
 
     private int entry_id()
     {
-        return (int) this.getValue( this.fields().get("entry_id") );
+        return (Integer) this.getValue( this.fields().get("entry_id") );
     }
 
 }
