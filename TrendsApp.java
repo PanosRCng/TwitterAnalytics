@@ -1,4 +1,5 @@
 import TwitterAnalytics.Models.Hashtag;
+import TwitterAnalytics.Models.TrendSentiment;
 import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
 import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
@@ -17,10 +18,10 @@ public class TrendsApp implements RateLimitStatusListener
 
     public TrendsApp()
     {
-        TwitterApi.client().addRateLimitStatusListener(this);
-        this.collect();
+        //TwitterApi.client().addRateLimitStatusListener(this);
+        //this.collect();
 
-        //this.analysis();
+        this.analysis();
     }
 
 
@@ -220,12 +221,8 @@ public class TrendsApp implements RateLimitStatusListener
 
             Vector<Double> s = Sentimenter.trendVector(t_matrix);
 
-            System.out.println("anger: " + s.get(0));
-            System.out.println("disgust: " + s.get(1));
-            System.out.println("fear: " + s.get(2));
-            System.out.println("happiness: " + s.get(3));
-            System.out.println("sadness: " + s.get(4));
-            System.out.println("surprise: " + s.get(5));
+            TrendSentiment trendSentiment = new TwitterAnalytics.Models.TrendSentiment(trend.entry_id, s.get(0), s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
+            int inserted_id = trendSentiment.save();
         }
 
     }

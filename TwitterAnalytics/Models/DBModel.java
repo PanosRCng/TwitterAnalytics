@@ -408,6 +408,11 @@ public class DBModel
                 preStmt.setLong(index, (long)field.get(this));
             }
 
+            if(field.getType() == double.class)
+            {
+                preStmt.setDouble(index, (double)field.get(this));
+            }
+
             return preStmt;
         }
         catch(Exception ex)
