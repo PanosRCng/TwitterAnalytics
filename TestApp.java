@@ -532,6 +532,76 @@ public class TestApp
 		}
 	}
 
+	public void trackUserTimeLine(String pagename, Paging paging, Map<Object, Double> stemMap, Map<Object, Double> sentimentMap) {
+
+		TimelinesResources timelinesResource = TwitterApi.client().timelines();
+
+		ResponseList<User> users;
+		int counter = 0;
+		long userID = -1;
+
+		Tokenizer tokenizer = new Tokenizer();
+
+		try {
+
+			do {
+
+				users = TwitterApi.client().searchUsers(pagename, -1);
+
+				for (User user : users) {
+					counter++;
+					userID = user.getId();
+					break;
+				}
+
+				ResponseList<Status> tweets = timelinesResource.getUserTimeline(userID, paging);
+
+				for(Status tweet : tweets) {
+
+					ResponseList<Status> retweets = TwitterApi.client().getRetweets(tweet.getId());
+
+					for(Status retweet : retweets){
+
+						Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(retweet));
+
+						Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
+
+						for(String stem : stems){
+							double wordCounter = 0;
+							if(stemMap.containsKey(stem)) wordCounter = stemMap.get(stem);
+							wordCounter = wordCounter + 1;
+							stemMap.put(stem, wordCounter);
+						}
+
+						Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+
+						double max = 0;
+						int sentiment=-1;
+
+						if(t_vector!=null) {
+							for (int i = 0; i < 6; i++) {
+								if (t_vector.get(i) > max) sentiment = i;
+							}
+
+							double tempCounter = 0;
+							if(sentimentMap.containsKey(sentiment)) tempCounter = sentimentMap.get(sentiment);
+							tempCounter=tempCounter + 1;
+
+							sentimentMap.put(sentiment, tempCounter);
+						}
+
+					}
+
+				}
+
+
+			} while (users.size() != 0 && counter == 0) ;
+
+		} catch(TwitterException e){
+			e.printStackTrace();
+		}
+	}
+
 	public static void myCode(){
 
 		//StreamTwitterUser streamTwitterUser = new StreamTwitterUser("@Eurohoopsnet");
@@ -609,7 +679,47 @@ public class TestApp
 
 		//generalFunctions.topUsers(stringUrl);
 
-		testApp.printCentralityResult("alpha", false);
+		//testApp.printCentralityResult("alpha", false);
+
+		Paging paging;
+		int pageno = 1;
+
+		Map<Object, Double> stemMap = new HashMap<Object, Double>();
+		Map<Object, Double> sentimentMap = new HashMap<Object, Double>();
+
+		while(true) {
+
+			GeneralFunctions generalFunctions = new GeneralFunctions();
+			boolean checkLimit = generalFunctions.checkRateLimit();
+			if(checkLimit) {
+				try {
+					Thread.sleep(900000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			paging = new Paging(pageno++, 1000);
+
+			testApp.trackUserTimeLine("@pyrosvestiki", paging, stemMap, sentimentMap);
+
+			if(pageno==1000) pageno=1;
+
+			stemMap = GeneralFunctions.sortByValue(stemMap);
+
+			for(Map.Entry<Object, Double> entry : stemMap.entrySet()){
+				System.out.println(entry.getKey());
+				System.out.println(entry.getValue());
+			}
+
+			System.out.println("anger: " + sentimentMap.get(0));
+			System.out.println("disgust: " + sentimentMap.get(1));
+			System.out.println("fear: " + sentimentMap.get(2));
+			System.out.println("happiness: " + sentimentMap.get(3));
+			System.out.println("sadness: " + sentimentMap.get(4));
+			System.out.println("surprise: " + sentimentMap.get(5));
+
+		}
 
 	}
 
