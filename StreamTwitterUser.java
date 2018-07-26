@@ -17,21 +17,11 @@ public class StreamTwitterUser {
 
         System.out.println(userName);
 
-        ResponseList<User> users;
-
-        int counter=0;
-
         try {
-            do {
 
-                users = TwitterApi.client().searchUsers(userName, -1);
+            User user  = TwitterApi.client().showUser(userName);
 
-                for (User user : users) {
-                    counter++;
-                    userID = user.getId();
-                    break;
-                }
-            } while (users.size() != 0 && counter==0);
+            userID = user.getId();
 
         } catch (TwitterException e) {
             e.printStackTrace();

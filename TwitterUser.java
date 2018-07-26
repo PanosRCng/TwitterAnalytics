@@ -26,19 +26,16 @@ public class TwitterUser {
         {
             UsersResources userResource = TwitterApi.client().users();
 
-            ResponseList<User> users = userResource.lookupUsers(userID);
+            User user = userResource.showUser(userID);
 
-            for(User user : users)
-            {
-                System.out.println(user.getName());
+            System.out.println(user.getName());
 
-                //this.userStats(user, false);
-                //this.userStats(user, true);
+            //this.userStats(user, false);
+            //this.userStats(user, true);
 
-                //twitterUser.printUserStatsByDate(user);
+            //twitterUser.printUserStatsByDate(user);
 
-                //this.userTimeline(user.getId());
-            }
+            //this.userTimeline(user.getId());
         }
         catch(TwitterException twitterException)
         {
@@ -188,14 +185,13 @@ public class TwitterUser {
                 String[] splited = line.replaceAll("\\p{P}","").split("\\s+");
 
                 for(String tweet : splited){
-                    if(tweet.isEmpty()) continue;
+                    if(tweet.length()==0) continue;
                     try {
 
-                        ResponseList<Status> tweets = TwitterApi.client().tweets().lookup(Long.parseLong(tweet));
+                        Status tweetUser = TwitterApi.client().tweets().showStatus(Long.parseLong(tweet));
 
-                        for(Status tweetUser : tweets){
-                            System.out.println(tweetUser.getText());
-                        }
+                        System.out.println(tweetUser.getText());
+
                     } catch (TwitterException e) {
                         e.printStackTrace();
                     }

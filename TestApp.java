@@ -99,19 +99,15 @@ public class TestApp
 
 				Long key = entry.getKey();
 
-				ResponseList<User> users = userResource.lookupUsers(key);
+				User user = userResource.showUser(key);
 
-				for(User user : users)
-				{
+				System.out.println("Most influential person: " + user.getName() + " - " + user.getScreenName());
+				Double value = entry.getValue();
+				System.out.println("Score: " + Math.round(value * 100.0) / 100.0);
+				Set<DefaultEdge> userTweets = graph.getInstance().edgesOf(key);
+				System.out.println("Number of edges: " + userTweets.size());
+				System.out.println("Location : " + user.getLocation());
 
-					System.out.println("Most influential person: " + user.getName() + " - " + user.getScreenName());
-					Double value = entry.getValue();
-					System.out.println("Score: " + Math.round(value * 100.0) / 100.0);
-					Set<DefaultEdge> userTweets = graph.getInstance().edgesOf(key);
-					System.out.println("Number of edges: " + userTweets.size());
-					System.out.println("Location : " + user.getLocation());
-
-				}
 			}
 			catch(TwitterException twitterException)
 			{
@@ -133,58 +129,51 @@ public class TestApp
 		for (Map.Entry<Long, Double> entry : map.entrySet())
 		{
 
-			ResponseList<User> users = null;
+			User user = null;
 			try {
-				users = userResource.lookupUsers(entry.getKey());
+				user = userResource.showUser(entry.getKey());
 
-				for(User user : users)
-				{
 
-					String user_tweets = "select * from tweets where userID="+user.getId();
+				String user_tweets = "select * from tweets where userID="+user.getId();
 
-					try {
-						preparedStmt = DB.conn().prepareStatement(user_tweets);
+				try {
+					preparedStmt = DB.conn().prepareStatement(user_tweets);
 
-						ResultSet rs = preparedStmt.executeQuery();
+					ResultSet rs = preparedStmt.executeQuery();
 
-						while (rs.next()) {
+					while (rs.next()) {
 
-							ResponseList<Status> tweets = tweetResource.lookup(rs.getLong("statusID"));
+						Status tweet = tweetResource.showStatus(rs.getLong("statusID"));
 
-							for(Status tweet : tweets)
-							{
 
-								if(tweet.getLang().equals("el")){
+						if(tweet.getLang().equals("el")){
 
-									//System.out.println(tweet.getText());
+							//System.out.println(tweet.getText());
 
-									Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
+							Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
 
-									Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
+							Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 
-									//Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+							//Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
 
-									for(String stem : stems){
-										double wordCounter = 0;
-										if(wordCount.containsKey(stem)) wordCounter = wordCount.get(stem);
-										wordCounter = wordCounter + 1;
-										wordCount.put(stem, wordCounter);
-									}
-
-									/*System.out.println("anger: " + t_vector.get(0));
-									System.out.println("disgust: " + t_vector.get(1));
-									System.out.println("fear: " + t_vector.get(2));
-									System.out.println("happiness: " + t_vector.get(3));
-									System.out.println("sadness: " + t_vector.get(4));
-									System.out.println("surprise: " + t_vector.get(5));*/
-								}
-
+							for(String stem : stems){
+								double wordCounter = 0;
+								if(wordCount.containsKey(stem)) wordCounter = wordCount.get(stem);
+								wordCounter = wordCounter + 1;
+								wordCount.put(stem, wordCounter);
 							}
-						}
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
 
+							/*System.out.println("anger: " + t_vector.get(0));
+							System.out.println("disgust: " + t_vector.get(1));
+							System.out.println("fear: " + t_vector.get(2));
+							System.out.println("happiness: " + t_vector.get(3));
+							System.out.println("sadness: " + t_vector.get(4));
+							System.out.println("surprise: " + t_vector.get(5));*/
+						}
+
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
 
 			} catch (TwitterException e) {
@@ -242,13 +231,10 @@ public class TestApp
 
 				System.out.println(tweetID);
 
-				ResponseList<Status> tweets = null;
-
 				try {
-					tweets = TwitterApi.client().tweets().lookup(Long.parseLong(tweetID));
-					for(Status tweetUser : tweets){
-						System.out.println(tweetUser.getText());
-					}
+					Status tweetUser = TwitterApi.client().tweets().showStatus(Long.parseLong(tweetID));
+
+					System.out.println(tweetUser.getText());
 				} catch (TwitterException e) {
 					e.printStackTrace();
 				}
@@ -558,6 +544,8 @@ public class TestApp
 
 				for(Status tweet : tweets) {
 
+					System.out.println(tweet.getInReplyToStatusId());
+
 					ResponseList<Status> retweets = TwitterApi.client().getRetweets(tweet.getId());
 
 					for(Status retweet : retweets){
@@ -600,6 +588,32 @@ public class TestApp
 		} catch(TwitterException e){
 			e.printStackTrace();
 		}
+	}
+
+	public void readComments(String pagename, Paging paging){
+
+		TimelinesResources timelinesResource = TwitterApi.client().timelines();
+
+		try {
+
+			User user = TwitterApi.client().showUser(pagename);
+
+			ResponseList<Status> tweets = timelinesResource.getUserTimeline(user.getId(), paging);
+
+			for(Status tweet : tweets) {
+
+				System.out.println(tweet.getInReplyToStatusId());
+
+				Status comment = TwitterApi.client().tweets().showStatus(tweet.getInReplyToStatusId());
+
+				System.out.println(comment.getText());
+
+			}
+
+		} catch(TwitterException e){
+			e.printStackTrace();
+		}
+
 	}
 
 	public static void myCode(){
@@ -681,7 +695,7 @@ public class TestApp
 
 		//testApp.printCentralityResult("alpha", false);
 
-		Paging paging;
+		/*Paging paging;
 		int pageno = 1;
 
 		Map<Object, Double> stemMap = new HashMap<Object, Double>();
@@ -719,8 +733,30 @@ public class TestApp
 			System.out.println("sadness: " + sentimentMap.get(4));
 			System.out.println("surprise: " + sentimentMap.get(5));
 
-		}
+		}*/
 
+		Paging paging;
+		int pageno = 1;
+
+		while(true) {
+
+			GeneralFunctions generalFunctions = new GeneralFunctions();
+			boolean checkLimit = generalFunctions.checkRateLimit();
+			if (checkLimit) {
+				try {
+					Thread.sleep(900000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			paging = new Paging(pageno++, 1000);
+
+			testApp.readComments("@CNN", paging);
+
+			if (pageno == 1000) pageno = 1;
+
+		}
 	}
 
 	public void findUsers(String search_string)
@@ -729,14 +765,11 @@ public class TestApp
 		{
 			UsersResources userResource = TwitterApi.client().users();
 
-			ResponseList<User> users = userResource.lookupUsers(search_string);
+			User user = userResource.showUser(search_string);
 
-			for(User user : users)
-			{
-				System.out.println(user.getName());
+			System.out.println(user.getName());
 
-				this.userTimeline(user.getId());
-			}
+			this.userTimeline(user.getId());
 		}
 		catch(TwitterException twitterException)
 		{
