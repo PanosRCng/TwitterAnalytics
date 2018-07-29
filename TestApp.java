@@ -594,6 +594,8 @@ public class TestApp
 
 		TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
+		ArrayList<Status> replies = new ArrayList<Status>();
+
 		try {
 
 			User user = TwitterApi.client().showUser(pagename);
@@ -602,11 +604,13 @@ public class TestApp
 
 			for(Status tweet : tweets) {
 
-				System.out.println(tweet.getInReplyToStatusId());
+				System.out.println("Tweet: "+tweet.getText());
 
-				Status comment = TwitterApi.client().tweets().showStatus(tweet.getInReplyToStatusId());
+				replies = getReplies(pagename, tweet.getId());
 
-				System.out.println(comment.getText());
+				for(Status reply : replies){
+					System.out.println("Reply: "+reply.getText());
+				}
 
 			}
 
@@ -614,6 +618,29 @@ public class TestApp
 			e.printStackTrace();
 		}
 
+	}
+
+	public ArrayList<Status> getReplies(String screenName, long tweetID) {
+		ArrayList<Status> replies = new ArrayList<Status>();
+
+		try {
+			Query query = new Query(screenName);
+			QueryResult results;
+
+			do {
+				results = TwitterApi.client().search(query);
+				System.out.println("Results: " + results.getTweets().size());
+				List<Status> tweets = results.getTweets();
+
+				for (Status tweet : tweets)
+					if (tweet.getInReplyToStatusId() == tweetID)
+						replies.add(tweet);
+			} while ((query = results.nextQuery()) != null);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return replies;
 	}
 
 	public static void myCode(){
@@ -752,7 +779,7 @@ public class TestApp
 
 			paging = new Paging(pageno++, 1000);
 
-			testApp.readComments("@CNN", paging);
+			testApp.readComments("@skaigr", paging);
 
 			if (pageno == 1000) pageno = 1;
 
