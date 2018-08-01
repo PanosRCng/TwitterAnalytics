@@ -5,6 +5,7 @@ import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
 import TwitterAnalytics.TextAnalysis.Utils;
 import TwitterAnalytics.TwitterApi;
 import com.google.common.collect.Multimap;
+import com.google.common.primitives.Longs;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.scoring.AlphaCentrality;
 import org.jgrapht.alg.scoring.BetweennessCentrality;
@@ -141,37 +142,44 @@ public class TestApp
 
 					ResultSet rs = preparedStmt.executeQuery();
 
-					while (rs.next()) {
+					ArrayList<Long> ids = new ArrayList<Long>();
 
-						Status tweet = tweetResource.showStatus(rs.getLong("statusID"));
+                    while(rs.next()) ids.add(rs.getLong("statusID"));
 
+                    if(ids.size()>0) {
 
-						if(tweet.getLang().equals("el")){
+						long[][] batches = GeneralFunctions.chunkArray(Longs.toArray(ids), 100);
 
-							//System.out.println(tweet.getText());
+						for(int i=0;i<batches.length;i++) {
 
-							Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
+							ResponseList<Status> tweets = tweetResource.lookup(batches[i]);
 
-							Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
+							for (Status tweet : tweets) {
 
-							//Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+								Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
 
-							for(String stem : stems){
-								double wordCounter = 0;
-								if(wordCount.containsKey(stem)) wordCounter = wordCount.get(stem);
-								wordCounter = wordCounter + 1;
-								wordCount.put(stem, wordCounter);
-							}
+								Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 
-							/*System.out.println("anger: " + t_vector.get(0));
+								//Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+
+								for(String stem : stems){
+									double wordCounter = 0;
+									if(wordCount.containsKey(stem)) wordCounter = wordCount.get(stem);
+									wordCounter = wordCounter + 1;
+									wordCount.put(stem, wordCounter);
+								}
+
+								/*System.out.println("anger: " + t_vector.get(0));
 							System.out.println("disgust: " + t_vector.get(1));
 							System.out.println("fear: " + t_vector.get(2));
 							System.out.println("happiness: " + t_vector.get(3));
 							System.out.println("sadness: " + t_vector.get(4));
 							System.out.println("surprise: " + t_vector.get(5));*/
+							}
 						}
 
 					}
+
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -223,6 +231,8 @@ public class TestApp
 
 		Set<Long> vertices = graph.vertexSet();
 
+		ArrayList<Long> ids = new ArrayList<Long>();
+
 		for (Long vertex : vertices) {
 			Set<DefaultEdge> userTweets = graph.edgesOf(vertex);
 			for(DefaultEdge edge : userTweets) {
@@ -231,16 +241,29 @@ public class TestApp
 
 				System.out.println(tweetID);
 
-				try {
-					Status tweetUser = TwitterApi.client().tweets().showStatus(Long.parseLong(tweetID));
-
-					System.out.println(tweetUser.getText());
-				} catch (TwitterException e) {
-					e.printStackTrace();
-				}
+				ids.add(Long.parseLong(tweetID));
 			}
 
 			break;
+		}
+
+		if(ids.size()>0) {
+
+			long[][] batches = GeneralFunctions.chunkArray(Longs.toArray(ids), 100);
+
+			for(int i=0;i<batches.length;i++) {
+
+				try {
+					ResponseList<Status> tweets = TwitterApi.client().tweets().lookup(batches[i]);
+
+					for (Status tweet : tweets) {
+						System.out.println(tweet.getText());
+					}
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+
+			}
 		}
 	}
 
@@ -544,8 +567,6 @@ public class TestApp
 
 				for(Status tweet : tweets) {
 
-					System.out.println(tweet.getInReplyToStatusId());
-
 					ResponseList<Status> retweets = TwitterApi.client().getRetweets(tweet.getId());
 
 					for(Status retweet : retweets){
@@ -594,7 +615,7 @@ public class TestApp
 
 		TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
-		ArrayList<Status> replies = new ArrayList<Status>();
+		ArrayList<Status> replies;
 
 		try {
 
@@ -622,6 +643,7 @@ public class TestApp
 
 	public ArrayList<Status> getReplies(String screenName, long tweetID) {
 		ArrayList<Status> replies = new ArrayList<Status>();
+		Tokenizer tokenizer = new Tokenizer();
 
 		try {
 			Query query = new Query(screenName);
@@ -633,8 +655,23 @@ public class TestApp
 				List<Status> tweets = results.getTweets();
 
 				for (Status tweet : tweets)
-					if (tweet.getInReplyToStatusId() == tweetID)
+					if (tweet.getInReplyToStatusId() == tweetID) {
+						Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
+
+						Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 						replies.add(tweet);
+
+						Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+						System.out.println(t_vector);
+						if(t_vector!=null) {
+							System.out.println("anger: " + t_vector.get(0));
+							System.out.println("disgust: " + t_vector.get(1));
+							System.out.println("fear: " + t_vector.get(2));
+							System.out.println("happiness: " + t_vector.get(3));
+							System.out.println("sadness: " + t_vector.get(4));
+							System.out.println("surprise: " + t_vector.get(5));
+						}
+					}
 			} while ((query = results.nextQuery()) != null);
 
 		} catch (Exception e) {
@@ -661,8 +698,8 @@ public class TestApp
 		Multimap<Long, Long> userTweets = ArrayListMultimap.create();
 		Multimap<Long, Long> userRetweeters = ArrayListMultimap.create();
 		Paging paging;
-		int pageno;*/
-
+		int pageno;
+*/
 //		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //		context.setContextPath("/");
 //
@@ -685,7 +722,12 @@ public class TestApp
 		users.put("@sport24", 1);
 		users.put("@EuroLeague", 1);
 		Iterator<Map.Entry<String, Integer>> iter = users.entrySet().iterator();
-		PrintStream o = new PrintStream(new File("A.txt"));
+		PrintStream o = null;
+		try {
+			o = new PrintStream(new File("A.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		// Assign o to output stream
 		System.setOut(o);
 		while(true){
@@ -762,7 +804,7 @@ public class TestApp
 
 		}*/
 
-		Paging paging;
+		/*Paging paging;
 		int pageno = 1;
 
 		while(true) {
@@ -779,11 +821,11 @@ public class TestApp
 
 			paging = new Paging(pageno++, 1000);
 
-			testApp.readComments("@skaigr", paging);
+			testApp.readComments("@pyrosvestiki", paging);
 
 			if (pageno == 1000) pageno = 1;
 
-		}
+		}*/
 	}
 
 	public void findUsers(String search_string)

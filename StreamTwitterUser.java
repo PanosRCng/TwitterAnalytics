@@ -47,21 +47,26 @@ public class StreamTwitterUser {
     StatusListener listener = new StatusListener() {
 
         public void onStatus(Status status) {
-            System.out.println(status.getText());
 
-            try {
-                String query = " insert into tempStatus (userID, statusID, date)"
-                        + " values (?, ?, ?)";
+            if(!status.isRetweet()) {
 
-                PreparedStatement preparedStmt = DB.conn().prepareStatement(query);
+                System.out.println(status.getText());
 
-                preparedStmt.setLong    (1, status.getUser().getId());
-                preparedStmt.setLong    (2, status.getId());
-                preparedStmt.setDate    (3, new java.sql.Date(status.getCreatedAt().getTime()));
+                try {
+                    String query = " insert into tempStatus (userID, statusID, date)"
+                            + " values (?, ?, ?)";
 
-                preparedStmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
+                    PreparedStatement preparedStmt = DB.conn().prepareStatement(query);
+
+                    preparedStmt.setLong(1, status.getUser().getId());
+                    preparedStmt.setLong(2, status.getId());
+                    preparedStmt.setDate(3, new java.sql.Date(status.getCreatedAt().getTime()));
+
+                    preparedStmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
             }
 
         }

@@ -1,5 +1,6 @@
 import TwitterAnalytics.DB;
 import TwitterAnalytics.TwitterApi;
+import com.google.common.primitives.Longs;
 import twitter4j.*;
 import twitter4j.api.TimelinesResources;
 import twitter4j.api.UsersResources;
@@ -13,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class TwitterUser {
@@ -180,21 +182,16 @@ public class TwitterUser {
 
             JSONObject obj;
             String line = null;
+
+            ArrayList<Long> ids = new ArrayList<Long>();
+
             while ((line = reader.readLine()) != null) {
 
                 String[] splited = line.replaceAll("\\p{P}","").split("\\s+");
 
                 for(String tweet : splited){
                     if(tweet.length()==0) continue;
-                    try {
-
-                        Status tweetUser = TwitterApi.client().tweets().showStatus(Long.parseLong(tweet));
-
-                        System.out.println(tweetUser.getText());
-
-                    } catch (TwitterException e) {
-                        e.printStackTrace();
-                    }
+                    ids.add(Long.parseLong(tweet));
                 }
 //                try {
 //                    obj = new JSONObject(line);
@@ -207,6 +204,25 @@ public class TwitterUser {
 //                    //e.printStackTrace();
 //                }
 
+            }
+
+            if(ids.size()>0) {
+
+                long[][] batches = GeneralFunctions.chunkArray(Longs.toArray(ids), 100);
+
+                for(int i=0;i<batches.length;i++) {
+
+                    try {
+                        ResponseList<Status> tweets = TwitterApi.client().tweets().lookup(batches[i]);
+
+                        for (Status tweet : tweets) {
+                            System.out.println(tweet.getText());
+                        }
+                    } catch (TwitterException e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }
 
         } catch (IOException e) {
