@@ -19,7 +19,7 @@ public class TwitterApi
     {
         ConfigurationBuilder confBuilder = new ConfigurationBuilder();
 
-        confBuilder.setDebugEnabled(true)
+        confBuilder.setDebugEnabled(true).setTweetModeExtended(true)
                 .setOAuthConsumerKey(Config.twitter_api().CONSUMER_KEY)
                 .setOAuthConsumerSecret(Config.twitter_api().CONSUMER_SECRET)
                 .setOAuthAccessToken(Config.twitter_api().ACCESS_TOKEN)
