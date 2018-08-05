@@ -30,7 +30,7 @@ import TwitterAnalytics.Models.Tweet;
 public class TestApp
 {
 
-	public void printCentralityResult(String centrality, boolean printMostInfluentialPerson) {
+	public void printCentralityResult(String centrality, boolean printMostInfluentialPerson, String category) {
 
 		UserRetweeterGraph graph = new UserRetweeterGraph();
 
@@ -157,7 +157,7 @@ public class TestApp
 
 							for (Status tweet : tweets) {
 
-								Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
+								Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet, category));
 
 								Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 
@@ -542,12 +542,13 @@ public class TestApp
 		}
 	}
 
-	public void trackUserTimeLine(String pagename, Paging paging, Map<Object, Double> stemMap, Map<Object, Double> sentimentMap) {
+	public void trackUserTimeLine(String pagename, Paging paging, Map<Object, Double> stemMap,
+								  Map<Object, Double> sentimentMap, String category) {
 
 		TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
-		ResponseList<User> users;
-		int counter = 0;
+		//ResponseList<User> users;
+		//int counter = 0;
 		long userID = -1;
 
 		Tokenizer tokenizer = new Tokenizer();
@@ -574,7 +575,7 @@ public class TestApp
 
 					for(Status retweet : retweets){
 
-						Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(retweet));
+						Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(retweet, category));
 
 						Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 
@@ -693,7 +694,7 @@ public class TestApp
 
 		Tokenizer tokenizer = new Tokenizer();
 
-		Map<String,Map<String, Vector<Double>>> sentimentOverTime = new HashMap<String, Map<String, Vector<Double>>>();
+		Map<String,Vector<Status>> sentimentOverTime = new HashMap<String,Vector<Status>>();
 System.out.print("size of array : "+tweets.size());
 		//try {
 			if(category.equals("replies")) {
@@ -702,7 +703,7 @@ System.out.print("size of array : "+tweets.size());
 
 			}else if(category.equals("retweets")){
 
-				//tweets.addAll(search(pagename, false));
+				search(pagename, true, tweets);
 
 			}
 		//}catch (Exception e) {
@@ -710,22 +711,23 @@ System.out.print("size of array : "+tweets.size());
 			System.out.println("yoloooooo");
 		    System.out.println(tweets.size());
 
-			Vector<Double> vector;
+			Vector<Status> vector;
 
 			for (Status tweet : tweets) {
 
-				Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet));
+				/*Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet, category));
 
 				Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
 
 				Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
 
 				if(t_vector==null) System.out.println("NULL vector");
+*/
+				//if(t_vector!=null) {
+					if (!sentimentOverTime.containsKey(DateFormat.getDateInstance().format(tweet.getCreatedAt()))) {
+						//Map<String, Vector<Double>> map2 = new HashMap<String, Vector<Double>>();
 
-				if(t_vector!=null) {
-					if (!sentimentOverTime.containsKey(tweet.getCreatedAt())) {
-						Map<String, Vector<Double>> map2 = new HashMap<String, Vector<Double>>();
-						vector = new Vector();
+						/*vector = new Vector();
 						vector.add(t_vector.get(1));
 						map2.put("disgust", vector);
 						vector = new Vector();
@@ -739,14 +741,17 @@ System.out.print("size of array : "+tweets.size());
 						map2.put("sadness", vector);
 						vector = new Vector();
 						vector.add(t_vector.get(5));
-						map2.put("surprise", vector);
+						map2.put("surprise", vector);*/
+
+						vector = new Vector<Status>();
+						vector.add(tweet);
 
 						String df = DateFormat.getDateInstance().format(tweet.getCreatedAt());
-						sentimentOverTime.put(df, map2);
+						sentimentOverTime.put(df, vector);
 					} else {
-						Map<String, Vector<Double>> map2 = sentimentOverTime.get(tweet.getCreatedAt());
+						//Map<String, Vector<Double>> map2 = sentimentOverTime.get(tweet.getCreatedAt());
 
-						vector = map2.get("disgust");
+						/*vector = map2.get("disgust");
 						vector.add(t_vector.get(1));
 						map2.put("disgust", vector);
 						vector = map2.get("fear");
@@ -760,20 +765,56 @@ System.out.print("size of array : "+tweets.size());
 						map2.put("sadness", vector);
 						vector = map2.get("surprise");
 						vector.add(t_vector.get(5));
-						map2.put("surprise", vector);
+						map2.put("surprise", vector);*/
+
+						vector = sentimentOverTime.get(DateFormat.getDateInstance().format(tweet.getCreatedAt()));
+						vector.add(tweet);
 
 						String df = DateFormat.getDateInstance().format(tweet.getCreatedAt());
-						sentimentOverTime.put(df, map2);
+						sentimentOverTime.put(df, vector);
 					}
-				}
+				//}
 
 			}
 
-			for (Map.Entry<String, Map<String, Vector<Double>>> entryDate : sentimentOverTime.entrySet()) {
+			for (Map.Entry<String, Vector<Status>> entryDate : sentimentOverTime.entrySet()) {
 
 				System.out.println("Date : " + entryDate.getKey());
 
-				for (Map.Entry<String, Vector<Double>> entrySentiment : entryDate.getValue().entrySet()) {
+				Vector<Vector<Double>> t_matrix = new Vector<Vector<Double>>();
+
+				System.out.println("Vector size : "+entryDate.getValue().size());
+
+				for(Status tweet : entryDate.getValue()){
+
+					Vector<String> tokens = tokenizer.tokenize(TwitterApi.cleanTweetText(tweet, category));
+
+					Vector<String> stems = Stemmer.stem(Utils.lowercase(tokens));
+
+					Vector<Double> t_vector = Sentimenter.sentimentVector(stems);
+
+					if(t_vector==null){
+						//System.out.println("NULL vector");
+					    continue;
+					}
+
+					t_matrix.add(t_vector);
+				}
+
+				if(t_matrix.size() != 0) {
+
+					Vector<Double> s = Sentimenter.trendVector(t_matrix);
+
+					System.out.println("anger: " + s.get(0));
+					System.out.println("disgust: " + s.get(1));
+					System.out.println("fear: " + s.get(2));
+					System.out.println("happiness: " + s.get(3));
+					System.out.println("sadness: " + s.get(4));
+					System.out.println("surprise: " + s.get(5));
+
+				}
+
+				/*for (Map.Entry<String, Vector<Double>> entrySentiment : entryDate.getValue().entrySet()) {
 					double sum = 0;
 
 					Vector<Double> values = entrySentiment.getValue();
@@ -784,7 +825,7 @@ System.out.print("size of array : "+tweets.size());
 					double average = sum / values.size();
 
 					System.out.println(entrySentiment.getKey()+" : " + average);
-				}
+				}*/
 
 				System.out.println("######################");
 			}
@@ -884,8 +925,9 @@ System.out.print("size of array : "+tweets.size());
 		//Map<Object, Double> sentimentMap = new HashMap<Object, Double>();
 
 		ArrayList<Status> tweets = new ArrayList<Status>();
-
-		while(true) {
+		paging = new Paging(pageno++, 1000);
+		testApp.sentimentOverTime("@olympiacos_org","retweets", paging, tweets);
+		/*while(true) {
 
 			GeneralFunctions generalFunctions = new GeneralFunctions();
 			boolean checkLimit = generalFunctions.checkRateLimit();
@@ -902,11 +944,11 @@ System.out.print("size of array : "+tweets.size());
 			//testApp.trackUserTimeLine("@pyrosvestiki", paging, stemMap, sentimentMap);
 			//testApp.search("@pyrosvestiki", false);
 
-			testApp.sentimentOverTime("@olympiacos_org","replies", paging, tweets);
+			testApp.sentimentOverTime("@olympiacos_org","retweets", paging, tweets);
 			System.out.println("Pageno : "+pageno);
 			if(pageno==1000) pageno=1;
 
-			/*stemMap = GeneralFunctions.sortByValue(stemMap);
+			*//*stemMap = GeneralFunctions.sortByValue(stemMap);
 
 			for(Map.Entry<Object, Double> entry : stemMap.entrySet()){
 				System.out.println(entry.getKey());
@@ -918,9 +960,9 @@ System.out.print("size of array : "+tweets.size());
 			System.out.println("fear: " + sentimentMap.get(2));
 			System.out.println("happiness: " + sentimentMap.get(3));
 			System.out.println("sadness: " + sentimentMap.get(4));
-			System.out.println("surprise: " + sentimentMap.get(5));*/
+			System.out.println("surprise: " + sentimentMap.get(5));*//*
 
-		}
+		}*/
 
 		/*Paging paging;
 		int pageno = 1;
@@ -987,10 +1029,8 @@ System.out.print("size of array : "+tweets.size());
 	}
 
 
-	public ArrayList<Status> search(String query_string, boolean getRetweet)
+	public void search(String query_string, boolean getRetweet, ArrayList<Status> tweetsList)
 	{
-
-		ArrayList<Status> tweets = null;
 
 		try
 		{
@@ -1000,41 +1040,48 @@ System.out.print("size of array : "+tweets.size());
 
 			QueryResult result;
 
+			int counter = 0;
+
 			do
 			{
 				result = TwitterApi.client().search(query);
 
-				tweets = (ArrayList<Status>) result.getTweets();
-				System.out.println(tweets.size());
-				Iterator<Status> it = tweets.iterator();
-				while (it.hasNext()) {
-					Status status = it.next();
+				ArrayList<Status> tweets = (ArrayList<Status>) result.getTweets();
+				//System.out.println(tweets.size());
+
+				for(Status tweet : tweets) {
+
 					if(!getRetweet) {
-						if (status.isRetweet()) {
-							it.remove();
+						if (!tweet.isRetweet()) {
+							tweetsList.add(tweet);
 						}
 					}else{
-						if (!status.isRetweet()) {
-							it.remove();
+						if (tweet.isRetweet()) {
+							System.out.println("Size "+tweetsList.size());
+							System.out.println(tweet.getCreatedAt());
+							System.out.println(tweet.getRetweetedStatus().getText());
+							tweetsList.add(tweet);
 						}
 					}
 				}
-				System.out.println(tweets.size());
+				//System.out.println(tweets.size());
 				/*for(Status tweet : tweets)
 				{
 					System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
 				}*/
 
+				counter = counter + 1;
+
 			}
 			while( (query = result.nextQuery()) != null );
+
+			System.out.println("Counter : "+counter);
 		}
 		catch(TwitterException te)
 		{
 			te.printStackTrace();
 			System.out.println("Failed to search tweets: " + te.getMessage());
 		}
-
-		return tweets;
 	}
 
 

@@ -42,7 +42,7 @@ public class TrendsApp implements RateLimitStatusListener
     {
         while(true)
         {
-            this.getTrends(23424833, 10, 100);
+            this.getTrends(23424833, 10, 100, "retweets");
 
             this.wait(1);
         }
@@ -76,7 +76,7 @@ public class TrendsApp implements RateLimitStatusListener
     }
 
 
-    private void getTrends(int woeid, int max_trends, int max_tweets_per_trend)
+    private void getTrends(int woeid, int max_trends, int max_tweets_per_trend, String category)
     {
         List<twitter4j.Trend> top10trends = this.getTopTrends(woeid, max_trends);
 
@@ -85,7 +85,7 @@ public class TrendsApp implements RateLimitStatusListener
             TwitterAnalytics.Models.Trend trendC = new TwitterAnalytics.Models.Trend(trend.getName(), trend.getQuery());
             int inserted_id = trendC.save();
 
-            this.search(inserted_id, trend.getQuery(), max_tweets_per_trend );
+            this.search(inserted_id, trend.getQuery(), max_tweets_per_trend, category );
         }
     }
 
@@ -111,7 +111,7 @@ public class TrendsApp implements RateLimitStatusListener
     }
 
 
-    private void search(int trend_id, String query_string, int max_results)
+    private void search(int trend_id, String query_string, int max_results, String category)
     {
         try
         {
@@ -137,7 +137,7 @@ public class TrendsApp implements RateLimitStatusListener
 
                     tweet_counter++;
 
-                    String clean_text = TwitterApi.cleanTweetText( tweet );
+                    String clean_text = TwitterApi.cleanTweetText(tweet, category);
 
                     TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(tweet.getText(), clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
                     tweetC.save();

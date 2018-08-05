@@ -112,15 +112,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/twitter4j-core-4.0.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/lucene-analyzers-common-7.4.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -131,6 +122,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/lucene-core-7.4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/twitter4j-core-4.0.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
