@@ -5,6 +5,8 @@ import TwitterAnalytics.ConfigManager.Config;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
+import com.vdurmont.emoji.EmojiParser;
+
 import java.util.Map;
 import java.util.Vector;
 
@@ -24,7 +26,8 @@ public class TwitterApi
                 .setOAuthConsumerKey(Config.twitter_api().CONSUMER_KEY)
                 .setOAuthConsumerSecret(Config.twitter_api().CONSUMER_SECRET)
                 .setOAuthAccessToken(Config.twitter_api().ACCESS_TOKEN)
-                .setOAuthAccessTokenSecret(Config.twitter_api().ACCESS_TOKEN_SECRET);
+                .setOAuthAccessTokenSecret(Config.twitter_api().ACCESS_TOKEN_SECRET)
+                .setTweetModeExtended(true);
 
         TwitterFactory twitterFactory = new TwitterFactory(confBuilder.build());
 
@@ -127,6 +130,8 @@ public class TwitterApi
         {
             text = text.replace(d, " ");
         }
+
+        text = EmojiParser.removeAllEmojis(text);
 
         return text;
     }

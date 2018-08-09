@@ -46,7 +46,7 @@ public class TrendsApp implements RateLimitStatusListener
         {
             this.getTrends(23424833, 10, 100);
 
-            this.wait(1);
+            this.wait(15);
         }
     }
 
@@ -59,7 +59,7 @@ public class TrendsApp implements RateLimitStatusListener
 
     private void backoff()
     {
-        this.wait(1);
+        this.wait(15);
 
         this.collect();
     }

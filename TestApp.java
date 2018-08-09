@@ -13,6 +13,7 @@ import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
 
 
+
 public class TestApp
 {
 
@@ -143,7 +144,6 @@ public class TestApp
 
 		TrendsApp trendsApp = new TrendsApp();
 
-		
 		System.out.println("all ok");
 	}
 
