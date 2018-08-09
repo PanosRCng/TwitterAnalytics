@@ -143,7 +143,7 @@ public class TestApp
 
 		TrendsApp trendsApp = new TrendsApp();
 
-
+		
 		System.out.println("all ok");
 	}
 

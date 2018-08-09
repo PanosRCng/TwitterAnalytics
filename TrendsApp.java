@@ -1,3 +1,4 @@
+import TwitterAnalytics.InvertedIndex.InvertedIndex;
 import TwitterAnalytics.Models.Hashtag;
 import TwitterAnalytics.Models.TrendSentiment;
 import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
@@ -27,7 +28,7 @@ public class TrendsApp implements RateLimitStatusListener
 
     public void onRateLimitReached(RateLimitStatusEvent event)
     {
-        System.out.println("Rate limite reached, app will back off now");
+        System.out.println("Rate limit reached, app will back off now");
 
         this.backoff();
     }
@@ -86,7 +87,7 @@ public class TrendsApp implements RateLimitStatusListener
             TwitterAnalytics.Models.Trend trendC = new TwitterAnalytics.Models.Trend(trend.getName(), trend.getQuery());
             int inserted_id = trendC.save();
 
-            this.search(inserted_id, trend.getQuery(), max_tweets_per_trend );
+            this.search(inserted_id, trend.getName(), trend.getQuery(), max_tweets_per_trend );
         }
     }
 
@@ -112,8 +113,11 @@ public class TrendsApp implements RateLimitStatusListener
     }
 
 
-    private void search(int trend_id, String query_string, int max_results)
+    private void search(int trend_id, String trend_name, String query_string, int max_results)
     {
+        InvertedIndex invertedIndex = InvertedIndex.open(trend_name);
+        Tokenizer tokenizer = new Tokenizer();
+
         try
         {
             Query query = new Query(query_string);
@@ -141,13 +145,23 @@ public class TrendsApp implements RateLimitStatusListener
                     String clean_text = TwitterApi.cleanTweetText( tweet );
 
                     TwitterAnalytics.Models.Tweet tweetC = new TwitterAnalytics.Models.Tweet(tweet.getText(), clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
-                    tweetC.save();
+                    long tweet_id = tweetC.save();
 
                     for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
                     {
                         Hashtag hashtag = new Hashtag(hashtagEntity.getText(), trend_id);
                         hashtag.save();
                     }
+
+                    Vector<String> tokens = tokenizer.tokenize(clean_text);
+
+                    StringBuilder sb = new StringBuilder();
+                    for(String token : tokens)
+                    {
+                        sb.append(token + " ");
+                    }
+
+                    invertedIndex.insert(Long.toString(tweet_id), sb.toString());
                 }
             }
             while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
@@ -159,6 +173,8 @@ public class TrendsApp implements RateLimitStatusListener
             te.printStackTrace();
             System.out.println("Failed to search tweets: " + te.getMessage());
         }
+
+        invertedIndex.close();
     }
 
 
@@ -166,14 +182,11 @@ public class TrendsApp implements RateLimitStatusListener
     {
         Tokenizer tokenizer = new Tokenizer();
 
-
         for(TwitterAnalytics.Models.Trend trend : TwitterAnalytics.Models.Trend.all())
         {
 
             System.out.println("----------------------- ------------------------------------");
-
             System.out.println(trend.name);
-
 
             Vector<Vector<Double>> t_matrix = new Vector<>();
 
@@ -187,7 +200,6 @@ public class TrendsApp implements RateLimitStatusListener
 
                 Vector<String> stems = Stemmer.stem( Utils.lowercase(tokens) );
 
-
                 Vector<Double> t_vector = Sentimenter.sentimentVector( stems );
 
                 if(t_vector == null)
@@ -196,22 +208,6 @@ public class TrendsApp implements RateLimitStatusListener
                 }
 
                 t_matrix.add( t_vector );
-
-                /*
-                for(String token : tokens)
-                {
-                    System.out.println("|" + token + "|" + " <-> " + "|" + Stemmer.stem( Utils.lowercase(token) ) + "|");
-                }
-
-                for(String stem_token : stem_tokens)
-                {
-                    System.out.println("|" + stem_token + "|");
-                }
-                */
-
-                //System.out.println("-----------------------");
-                //System.out.println("-----------------------");
-
             }
 
             if(t_matrix.size() == 0)
@@ -223,6 +219,14 @@ public class TrendsApp implements RateLimitStatusListener
 
             TrendSentiment trendSentiment = new TwitterAnalytics.Models.TrendSentiment(trend.entry_id, s.get(0), s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
             int inserted_id = trendSentiment.save();
+
+
+            InvertedIndex invertedIndex = InvertedIndex.open(trend.name);
+
+            for(String term : invertedIndex.topNerms(10))
+            {
+                System.out.println(term);
+            }
         }
 
     }
