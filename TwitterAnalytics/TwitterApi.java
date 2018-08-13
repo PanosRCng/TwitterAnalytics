@@ -133,6 +133,10 @@ public class TwitterApi
             text = text.replace(d, " ");
         }
 
+        //text = text.replace("RT", " ");
+       // text = text.replace(":", " ");
+       // text = text.trim();
+
         return text;
     }
 
