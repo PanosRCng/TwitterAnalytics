@@ -1,5 +1,6 @@
 import java.util.*;
 
+import TwitterAnalytics.Hibernate;
 import TwitterAnalytics.Models.Tweet;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -11,7 +12,6 @@ import TwitterAnalytics.TwitterApi;
 import twitter4j.User;
 import twitter4j.ResponseList;
 import twitter4j.api.TimelinesResources;
-
 
 
 public class TestApp
@@ -108,19 +108,19 @@ public class TestApp
 			{
 				result = TwitterApi.client().search(query);
 
-				List<Status> tweets = result.getTweets();
+				List<Status> statuses = result.getTweets();
 
-				for(Status tweet : tweets)
+				for(Status status : statuses)
 				{
-					if(tweet.isRetweet())
+					if(status.isRetweet())
 					{
 						continue;
 					}
 
 					tweet_counter++;
 
-					Tweet tweetC = new Tweet(tweet.getText(), tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
-					tweetC.save();
+					Tweet tweet = new Tweet(status.getText(), status.getId(), trend_id, new java.sql.Timestamp(status.getCreatedAt().getTime()) );
+					Hibernate.save(tweet);
 				}
 			}
 			while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
@@ -135,14 +135,15 @@ public class TestApp
 	}
 
 
-
 	public static void main(String[] args)
 	{
-		//TestApp testApp = new TestApp();
+		TestApp testApp = new TestApp();
+
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
 		TrendsApp trendsApp = new TrendsApp();
+
 
 		System.out.println("all ok");
 	}
