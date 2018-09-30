@@ -22,10 +22,10 @@ public class TrendsApp implements RateLimitStatusListener
 
     public TrendsApp()
     {
-        TwitterApi.client().addRateLimitStatusListener(this);
-        this.collect();
+        //TwitterApi.client().addRateLimitStatusListener(this);
+        //this.collect();
 
-        //this.analysis();
+            this.analysis();
     }
 
 

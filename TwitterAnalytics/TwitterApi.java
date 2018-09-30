@@ -4,6 +4,7 @@ package TwitterAnalytics;
 import TwitterAnalytics.ConfigManager.Config;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.conf.Configuration;
 
 import com.vdurmont.emoji.EmojiParser;
 
@@ -16,6 +17,7 @@ public class TwitterApi
 {
 
     private Twitter twitter = null;
+    private Configuration config = null;
 
 
     private TwitterApi()
@@ -29,7 +31,9 @@ public class TwitterApi
                 .setOAuthAccessTokenSecret(Config.twitter_api().ACCESS_TOKEN_SECRET)
                 .setTweetModeExtended(true);
 
-        TwitterFactory twitterFactory = new TwitterFactory(confBuilder.build());
+        this.config = confBuilder.build();
+
+        TwitterFactory twitterFactory = new TwitterFactory(this.config);
 
         this.twitter = twitterFactory.getInstance();
     }
@@ -44,6 +48,12 @@ public class TwitterApi
     public static Twitter client()
     {
         return SingletonHelper.INSTANCE.twitter;
+    }
+
+
+    public static TwitterStream getStream()
+    {
+        return new TwitterStreamFactory(SingletonHelper.INSTANCE.config).getInstance();
     }
 
 

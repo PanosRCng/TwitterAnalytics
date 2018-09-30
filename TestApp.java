@@ -137,13 +137,14 @@ public class TestApp
 
 	public static void main(String[] args)
 	{
-		TestApp testApp = new TestApp();
+		//TestApp testApp = new TestApp();
 
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
-		TrendsApp trendsApp = new TrendsApp();
+		//TrendsApp trendsApp = new TrendsApp();
 
+		StreamTestApp streamTestApp = new StreamTestApp();
 
 		System.out.println("all ok");
 	}

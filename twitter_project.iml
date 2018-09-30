@@ -13,7 +13,6 @@
     <orderEntry type="library" name="lucene-core-7.4.0" level="project" />
     <orderEntry type="library" name="lucene-queryparser-7.4.0" level="project" />
     <orderEntry type="library" name="lucene-misc-7.4.0" level="project" />
-    <orderEntry type="library" name="twitter4j-core-4.0.6" level="project" />
     <orderEntry type="library" name="emoji-java-4.0.0" level="project" />
     <orderEntry type="library" name="json-20180130" level="project" />
     <orderEntry type="library" name="antlr-2.7.7" level="project" />
@@ -31,5 +30,7 @@
     <orderEntry type="library" name="hibernate-c3p0-5.3.6.Final" level="project" />
     <orderEntry type="library" name="mchange-commons-java-0.2.11" level="project" />
     <orderEntry type="library" name="c3p0-0.9.5.2" level="project" />
+    <orderEntry type="library" name="twitter4j-core-4.0.7" level="project" />
+    <orderEntry type="library" name="twitter4j-stream-4.0.7" level="project" />
   </component>
 </module>
