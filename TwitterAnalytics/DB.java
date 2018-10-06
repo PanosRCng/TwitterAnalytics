@@ -17,7 +17,7 @@ public class DB
     {
         System.out.println("connecting to database " + Config.database().DATABASE_NAME);
 
-        String url = "jdbc:mysql://" + Config.database().DATABASE_SERVER + ":" + Config.database().DATABASE_PORT + "/" + Config.database().DATABASE_NAME;
+        String url = "jdbc:mysql://" + Config.database().DATABASE_SERVER + ":" + Config.database().DATABASE_PORT + "/" + Config.database().DATABASE_NAME + "?useTimezone=true&serverTimezone=Europe/Athens&useSSL=false";
 
         try
         {

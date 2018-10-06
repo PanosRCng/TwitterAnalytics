@@ -5,7 +5,7 @@
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://192.168.1.7:3306/twitter</property>
+        <property name="hibernate.connection.url">jdbc:mysql://192.168.1.7:3306/twitter?useTimezone=true&amp;serverTimezone=Europe/Athens&amp;useSSL=false</property>
         <property name="hibernate.connection.username">db_user</property>
         <property name="hibernate.connection.password">db_user</property>
         <property name="hibernate.connection.pool_size">1</property>
