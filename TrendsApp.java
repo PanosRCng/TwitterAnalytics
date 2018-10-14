@@ -1,9 +1,9 @@
 import TwitterAnalytics.Hibernate;
+import TwitterAnalytics.Models.*;
 import TwitterAnalytics.Models.Trend;
-import TwitterAnalytics.Models.Tweet;
-import TwitterAnalytics.Models.Hashtag;
-import TwitterAnalytics.Models.TrendSentiment;
-import TwitterAnalytics.Services.HTrendService;
+import TwitterAnalytics.Services.HashtagService;
+import TwitterAnalytics.Services.TrendService;
+import TwitterAnalytics.Services.TweetService;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
@@ -11,6 +11,7 @@ import twitter4j.api.TrendsResources;
 import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
 import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Utils;
+import TwitterAnalytics.InvertedIndex.InvertedIndex;
 
 import java.util.*;
 
@@ -18,14 +19,17 @@ import java.util.*;
 
 public class TrendsApp implements RateLimitStatusListener
 {
+    public static final int BACK_OFF_MINUTES = 1;
+
+    private Map<Integer, TwitterAnalytics.Models.Trend> trendsList;
 
 
     public TrendsApp()
     {
-        //TwitterApi.client().addRateLimitStatusListener(this);
-        //this.collect();
+        TwitterApi.client().addRateLimitStatusListener(this);
+        this.collect();
 
-            this.analysis();
+        //this.analysis();
     }
 
 
@@ -49,7 +53,7 @@ public class TrendsApp implements RateLimitStatusListener
         {
             this.getTrends(23424833, 10, 10);
 
-            this.wait(15);
+            this.wait(BACK_OFF_MINUTES);
         }
     }
 
@@ -62,7 +66,7 @@ public class TrendsApp implements RateLimitStatusListener
 
     private void backoff()
     {
-        this.wait(15);
+        this.wait(BACK_OFF_MINUTES);
 
         this.collect();
     }
@@ -85,13 +89,42 @@ public class TrendsApp implements RateLimitStatusListener
     {
         List<twitter4j.Trend> top10trends = this.getTopTrends(woeid, max_trends);
 
+        this.getTrendsList(top10trends);
+
+        for(Trend trend : this.trendsList.values())
+        {
+            this.search(trend, trend.getName(), trend.getQuery(), max_tweets_per_trend );
+        }
+    }
+
+
+    private void getTrendsList(List<twitter4j.Trend> top10trends)
+    {
+        this.trendsList = new HashMap<>();
+
+        int counter = 1;
+
         for(twitter4j.Trend trend : top10trends)
         {
-            Trend trendH = new Trend(trend.getName(), trend.getQuery());
-            Hibernate.save(trendH);
+            TwitterAnalytics.Models.Trend trendH = TrendService.createTrend(trend.getName(), trend.getQuery());
 
-            this.search(trendH.getId(), trend.getName(), trend.getQuery(), max_tweets_per_trend );
+            this.trendsList.put(counter++, trendH);
         }
+
+        TrendsList trendsListH = new TrendsList();
+        trendsListH.setTimestamp(new Date());
+        trendsListH.setTrend_id_1( this.trendsList.get(1).getId() );
+        trendsListH.setTrend_id_2( this.trendsList.get(2).getId() );
+        trendsListH.setTrend_id_3( this.trendsList.get(3).getId() );
+        trendsListH.setTrend_id_4( this.trendsList.get(4).getId() );
+        trendsListH.setTrend_id_5( this.trendsList.get(5).getId() );
+        trendsListH.setTrend_id_6( this.trendsList.get(6).getId() );
+        trendsListH.setTrend_id_7( this.trendsList.get(7).getId() );
+        trendsListH.setTrend_id_8( this.trendsList.get(8).getId() );
+        trendsListH.setTrend_id_9( this.trendsList.get(9).getId() );
+        trendsListH.setTrend_id_10( this.trendsList.get(10).getId() );
+
+        Hibernate.save( trendsListH );
     }
 
 
@@ -116,9 +149,9 @@ public class TrendsApp implements RateLimitStatusListener
     }
 
 
-    private void search(long trend_id, String trend_name, String query_string, int max_results)
+    private void search(Trend trend, String trend_name, String query_string, int max_results)
     {
-        //InvertedIndex invertedIndex = InvertedIndex.open(trend_name);
+        InvertedIndex invertedIndex = InvertedIndex.open(trend_name);
         Tokenizer tokenizer = new Tokenizer();
 
         try
@@ -147,14 +180,13 @@ public class TrendsApp implements RateLimitStatusListener
 
                     String clean_text = TwitterApi.cleanTweetText( tweet );
 
-                    Tweet tweetH = new Tweet(tweet.getText(), clean_text, tweet.getId(), trend_id, new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
-                    Hibernate.save(tweetH);
-                    long tweet_id = tweetH.getId();
+                    Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_text, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                    trend.addTweet(tweetH);
 
                     for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())
                     {
-                        Hashtag hashtag = new Hashtag(hashtagEntity.getText(), trend_id);
-                        Hibernate.save(hashtag);
+                        Hashtag hashtagH = HashtagService.createHashtag(hashtagEntity.getText());
+                        trend.addHashtag(hashtagH);
                     }
 
                     Vector<String> tokens = tokenizer.tokenize(clean_text);
@@ -165,7 +197,7 @@ public class TrendsApp implements RateLimitStatusListener
                         sb.append(token + " ");
                     }
 
-                    //invertedIndex.insert(Long.toString(tweet_id), sb.toString());
+                    invertedIndex.insert(Long.toString(tweetH.getId()), sb.toString());
                 }
             }
             while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
@@ -178,7 +210,7 @@ public class TrendsApp implements RateLimitStatusListener
             System.out.println("Failed to search tweets: " + te.getMessage());
         }
 
-        //invertedIndex.close();
+        invertedIndex.close();
     }
 
 
@@ -187,19 +219,17 @@ public class TrendsApp implements RateLimitStatusListener
         Tokenizer tokenizer = new Tokenizer();
 
 
-        for(Trend trend : HTrendService.getAll())
+        for(Trend trend : TrendService.getAll())
         {
             System.out.println("----------------------- ------------------------------------");
             System.out.println(trend.getName());
 
-
             Vector<Vector<Double>> t_matrix = new Vector<>();
-
 
             for(Tweet tweet : trend.tweets())
             {
                 //System.out.println("-----------------------");
-                //System.out.println(tweet.text);
+                //System.out.println(tweet.getText());
 
                 Vector<String> tokens = tokenizer.tokenize(tweet.getCleanText());
 
@@ -225,14 +255,12 @@ public class TrendsApp implements RateLimitStatusListener
             TrendSentiment trendSentiment = new TrendSentiment(trend.getId(), s.get(0), s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
             Hibernate.save(trendSentiment);
 
-            /*
             InvertedIndex invertedIndex = InvertedIndex.open(trend.getName());
 
             for(String term : invertedIndex.topNerms(10))
             {
                 System.out.println(term);
             }
-            */
         }
 
     }

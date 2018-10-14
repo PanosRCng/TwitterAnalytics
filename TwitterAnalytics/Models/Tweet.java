@@ -19,21 +19,19 @@ public class Tweet implements Serializable
     }
 
 
-    public Tweet(String text, long twitter_id, long trend_id, Timestamp timestamp)
+    public Tweet(String text, long twitter_id, Timestamp timestamp)
     {
         this.text = text;
         this.twitter_id = twitter_id;
-        this.trend_id = trend_id;
         this.timestamp = timestamp;
     }
 
 
-    public Tweet(String text, String clean_text, long twitter_id, long trend_id, Timestamp timestamp)
+    public Tweet(String text, String clean_text, long twitter_id, Timestamp timestamp)
     {
         this.text = text;
         this.twitter_id = twitter_id;
         this.clean_text = clean_text;
-        this.trend_id = trend_id;
         this.timestamp = timestamp;
     }
 
@@ -45,9 +43,6 @@ public class Tweet implements Serializable
 
     @Column(name = "twitter_id", unique = true)
     private Long twitter_id;
-
-    @Column(name = "trend_id")
-    private Long trend_id;
 
     @Column(name = "text", length = 1024)
     private String text;
@@ -78,17 +73,6 @@ public class Tweet implements Serializable
     public void setTwitterId(Long twitter_id)
     {
         this.twitter_id = twitter_id;
-    }
-
-
-    public Long getTrend_id()
-    {
-        return this.trend_id;
-    }
-
-    public void setTrend_id(Long trend_id)
-    {
-        this.trend_id = trend_id;
     }
 
 

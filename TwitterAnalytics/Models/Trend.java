@@ -1,7 +1,7 @@
 package TwitterAnalytics.Models;
 
 
-import TwitterAnalytics.Services.HTrendService;
+import TwitterAnalytics.Services.TrendService;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -42,7 +42,17 @@ public class Trend extends AbstractTimestampEntity implements Serializable
 
     public List<Tweet> tweets()
     {
-        return HTrendService.tweets(this.id);
+        return TrendService.tweets(this.id);
+    }
+
+    public void addTweet(Tweet tweet)
+    {
+        TrendService.addTweet(this.getId(), tweet.getId());
+    }
+
+    public void addHashtag(Hashtag hashtag)
+    {
+        TrendService.addHashtag(this.getId(), hashtag.getId());
     }
 
 

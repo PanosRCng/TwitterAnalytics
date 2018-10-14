@@ -119,8 +119,8 @@ public class TestApp
 
 					tweet_counter++;
 
-					Tweet tweet = new Tweet(status.getText(), status.getId(), trend_id, new java.sql.Timestamp(status.getCreatedAt().getTime()) );
-					Hibernate.save(tweet);
+					//Tweet tweet = new Tweet(status.getText(), status.getId(), trend_id, new java.sql.Timestamp(status.getCreatedAt().getTime()) );
+					//Hibernate.save(tweet);
 				}
 			}
 			while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
@@ -142,9 +142,9 @@ public class TestApp
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
-		//TrendsApp trendsApp = new TrendsApp();
+		TrendsApp trendsApp = new TrendsApp();
 
-		StreamTestApp streamTestApp = new StreamTestApp();
+		//StreamTestApp streamTestApp = new StreamTestApp();
 
 		System.out.println("all ok");
 	}

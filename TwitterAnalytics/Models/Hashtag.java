@@ -3,12 +3,10 @@ package TwitterAnalytics.Models;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import org.hibernate.annotations.SQLInsert;
 
 
 @Entity
 @Table(name = "hashtags", uniqueConstraints = {@UniqueConstraint(columnNames = "id")})
-@SQLInsert(sql="insert ignore into hashtags (name, trend_id, id) values (?, ?, ?)")
 
 
 public class Hashtag implements Serializable
@@ -20,10 +18,9 @@ public class Hashtag implements Serializable
     }
 
 
-    public Hashtag(String name, Long trend_id)
+    public Hashtag(String name)
     {
         this.name = name;
-        this.trend_id = trend_id;
     }
 
 
@@ -34,9 +31,6 @@ public class Hashtag implements Serializable
 
     @Column(name = "name", unique = true, length = 50)
     private String name;
-
-    @Column(name = "trend_id")
-    private Long trend_id;
 
     public Long getId()
     {
@@ -57,16 +51,5 @@ public class Hashtag implements Serializable
     public void setName(String name)
     {
         this.name = name;
-    }
-
-
-    public Long getTrend_id()
-    {
-        return this.trend_id;
-    }
-
-    public void setTrend_id(Long trend_id)
-    {
-        this.trend_id = trend_id;
     }
 }
