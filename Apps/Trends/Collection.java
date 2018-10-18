@@ -1,6 +1,12 @@
+package Apps.Trends;
+
+
 import TwitterAnalytics.Hibernate;
-import TwitterAnalytics.Models.*;
+import TwitterAnalytics.InvertedIndex.InvertedIndex;
+import TwitterAnalytics.Models.Hashtag;
 import TwitterAnalytics.Models.Trend;
+import TwitterAnalytics.Models.TrendsList;
+import TwitterAnalytics.Models.Tweet;
 import TwitterAnalytics.Services.HashtagService;
 import TwitterAnalytics.Services.TrendService;
 import TwitterAnalytics.Services.TweetService;
@@ -8,36 +14,24 @@ import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TrendsResources;
-import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
-import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
-import TwitterAnalytics.TextAnalysis.Utils;
-import TwitterAnalytics.InvertedIndex.InvertedIndex;
 
 import java.util.*;
 
 
-
-public class TrendsApp implements RateLimitStatusListener
+public class Collection extends TimerTask implements RateLimitStatusListener
 {
-    public static final int BACK_OFF_MINUTES = 1;
-
-    private Map<Integer, TwitterAnalytics.Models.Trend> trendsList;
+    private Map<Integer, Trend> trendsList;
 
 
-    public TrendsApp()
+    public Collection()
     {
         TwitterApi.client().addRateLimitStatusListener(this);
-        this.collect();
-
-        //this.analysis();
     }
 
 
     public void onRateLimitReached(RateLimitStatusEvent event)
     {
         System.out.println("Rate limit reached, app will back off now");
-
-        this.backoff();
     }
 
 
@@ -45,45 +39,6 @@ public class TrendsApp implements RateLimitStatusListener
     {
         //
     }
-
-
-    public void collect()
-    {
-        while(true)
-        {
-            this.getTrends(23424833, 10, 10);
-
-            this.wait(BACK_OFF_MINUTES);
-        }
-    }
-
-
-    public void analysis()
-    {
-        this.trend_analysis();
-    }
-
-
-    private void backoff()
-    {
-        this.wait(BACK_OFF_MINUTES);
-
-        this.collect();
-    }
-
-
-    private void wait(int minutes)
-    {
-        try
-        {
-            Thread.sleep(minutes * 60 *1000);
-        }
-        catch(InterruptedException ex)
-        {
-            System.out.println("Sleep interrupted");
-        }
-    }
-
 
     private void getTrends(int woeid, int max_trends, int max_tweets_per_trend)
     {
@@ -151,7 +106,7 @@ public class TrendsApp implements RateLimitStatusListener
 
     private void search(Trend trend, String trend_name, String query_string, int max_results)
     {
-        InvertedIndex invertedIndex = InvertedIndex.open(trend_name);
+        //InvertedIndex invertedIndex = InvertedIndex.open(trend_name);
         Tokenizer tokenizer = new Tokenizer();
 
         try
@@ -197,12 +152,12 @@ public class TrendsApp implements RateLimitStatusListener
                         sb.append(token + " ");
                     }
 
-                    invertedIndex.insert(Long.toString(tweetH.getId()), sb.toString());
+                    //invertedIndex.insert(Long.toString(tweetH.getId()), sb.toString());
                 }
             }
             while( ((query = result.nextQuery()) != null) && (tweet_counter <max_results) );
 
-            System.out.println("collected: " + tweet_counter + " tweets");
+            System.out.println(trend.getName() + ": collected: " + tweet_counter + " tweets");
         }
         catch(TwitterException te)
         {
@@ -210,59 +165,18 @@ public class TrendsApp implements RateLimitStatusListener
             System.out.println("Failed to search tweets: " + te.getMessage());
         }
 
-        invertedIndex.close();
+        //invertedIndex.close();
     }
 
 
-    private void trend_analysis()
+
+    @Override
+    public void run()
     {
-        Tokenizer tokenizer = new Tokenizer();
+        System.out.println(new Date().toString() + ": COLLECTING");
 
-
-        for(Trend trend : TrendService.getAll())
-        {
-            System.out.println("----------------------- ------------------------------------");
-            System.out.println(trend.getName());
-
-            Vector<Vector<Double>> t_matrix = new Vector<>();
-
-            for(Tweet tweet : trend.tweets())
-            {
-                //System.out.println("-----------------------");
-                //System.out.println(tweet.getText());
-
-                Vector<String> tokens = tokenizer.tokenize(tweet.getCleanText());
-
-                Vector<String> stems = Stemmer.stem( Utils.lowercase(tokens) );
-
-                Vector<Double> t_vector = Sentimenter.sentimentVector( stems );
-
-                if(t_vector == null)
-                {
-                    continue;
-                }
-
-                t_matrix.add( t_vector );
-            }
-
-            if(t_matrix.size() == 0)
-            {
-                continue;
-            }
-
-            Vector<Double> s = Sentimenter.trendVector(t_matrix);
-
-            TrendSentiment trendSentiment = new TrendSentiment(trend.getId(), s.get(0), s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
-            Hibernate.save(trendSentiment);
-
-            InvertedIndex invertedIndex = InvertedIndex.open(trend.getName());
-
-            for(String term : invertedIndex.topNerms(10))
-            {
-                System.out.println(term);
-            }
-        }
-
+        this.getTrends(23424833, 10, 100);
     }
+
 
 }

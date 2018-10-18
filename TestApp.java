@@ -1,5 +1,6 @@
 import java.util.*;
 
+import Apps.Trends.TrendsApp;
 import TwitterAnalytics.Hibernate;
 import TwitterAnalytics.Models.Tweet;
 import twitter4j.Query;
@@ -142,7 +143,7 @@ public class TestApp
 		//testApp.search("#GolGR");
 		//testApp.findUsers("Kathimerini_gr");
 
-		TrendsApp trendsApp = new TrendsApp();
+		Apps.Trends.TrendsApp trendsApp = new TrendsApp();
 
 		//StreamTestApp streamTestApp = new StreamTestApp();
 

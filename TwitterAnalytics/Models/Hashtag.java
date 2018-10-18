@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Table(name = "hashtags", uniqueConstraints = {@UniqueConstraint(columnNames = "id")})
 
 
-public class Hashtag implements Serializable
+public class Hashtag extends AbstractTimestampEntity implements Serializable
 {
 
     public Hashtag()

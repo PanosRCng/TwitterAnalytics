@@ -2,44 +2,39 @@ package TwitterAnalytics.Services;
 
 
 import TwitterAnalytics.Hibernate;
-import TwitterAnalytics.Models.Hashtag;
+import TwitterAnalytics.Models.TrendsList;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
 
-import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class HashtagService
+
+public class TrendSentimentService
 {
 
-    public static Hashtag createHashtag(String name)
+    public static List<TrendsList> getAll()
     {
-        Query q = Hibernate.session().createQuery("from Hashtag where name = :name");
-        q.setParameter("name", name);
-        List hashtagsResults = q.getResultList();
-
-        if(hashtagsResults.size() > 0)
+        try
         {
-            return (Hashtag) hashtagsResults.get(0);
+            return Hibernate.session().createCriteria(TrendsList.class).list();
         }
-
-        Hashtag hashtag = new Hashtag(name);
-        Hibernate.save(hashtag);
-
-        return hashtag;
+        catch (Exception e)
+        {
+            return new ArrayList<>();
+        }
     }
 
 
-    public static List<Long> removeHashtagsByDateRange(Date fromDate, Date toDate)
+    public static List<Long> removeTrendSentimentByDateRange(Date fromDate, Date toDate)
     {
         List<Long> toDeleteIds = new ArrayList<>();
 
         try
         {
-            NativeQuery query = Hibernate.session().createSQLQuery("SELECT id from hashtags where created_at between :fromDate and :toDate");
+            NativeQuery query = Hibernate.session().createSQLQuery("SELECT id from trend_sentiments where created_at between :fromDate and :toDate");
             query.setParameter("fromDate", fromDate);
             query.setParameter("toDate", toDate);
             List<Integer> results = query.getResultList();
@@ -61,13 +56,9 @@ public class HashtagService
                 Transaction transaction = Hibernate.session().getTransaction();
                 transaction.begin();
 
-                NativeQuery query = Hibernate.session().createSQLQuery("delete from trends_hashtags where hashtag_id IN (:ids)");
+                NativeQuery query = Hibernate.session().createSQLQuery("delete from trend_sentiments where id IN (:ids)");
                 query.setParameterList("ids", toDeleteIds);
                 query.executeUpdate();
-
-                NativeQuery query2 = Hibernate.session().createSQLQuery("delete from hashtags where id IN (:ids)");
-                query2.setParameterList("ids", toDeleteIds);
-                query2.executeUpdate();
 
                 transaction.commit();
             }

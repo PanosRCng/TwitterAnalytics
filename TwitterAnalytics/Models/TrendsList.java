@@ -1,9 +1,13 @@
 package TwitterAnalytics.Models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.*;
 import java.io.Serializable;
+
+import TwitterAnalytics.Services.TrendsListService;
 
 
 @Entity
@@ -73,6 +77,31 @@ public class TrendsList implements Serializable
 
     @Column(name = "trend_id_10")
     private Long trend_id_10;
+
+
+    public List<Trend> trends()
+    {
+        return TrendsListService.trends(this.trendsIds());
+    }
+
+
+    public List<Long> trendsIds()
+    {
+        List<Long> trendsIds = new ArrayList<>();
+
+        trendsIds.add( this.getTrend_id_1() );
+        trendsIds.add( this.getTrend_id_2() );
+        trendsIds.add( this.getTrend_id_3() );
+        trendsIds.add( this.getTrend_id_4() );
+        trendsIds.add( this.getTrend_id_5() );
+        trendsIds.add( this.getTrend_id_6() );
+        trendsIds.add( this.getTrend_id_7() );
+        trendsIds.add( this.getTrend_id_8() );
+        trendsIds.add( this.getTrend_id_9() );
+        trendsIds.add( this.getTrend_id_10() );
+
+        return trendsIds;
+    }
 
 
     public Long getId()
