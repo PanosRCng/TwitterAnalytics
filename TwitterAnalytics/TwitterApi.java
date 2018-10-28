@@ -105,7 +105,7 @@ public class TwitterApi
     }
 
 
-    public static String cleanTweetText(Status tweet)
+    public static String cleanTweetText(Status tweet, String category)
     {
         Vector<String> to_remove = new Vector<>();
 
@@ -134,7 +134,13 @@ public class TwitterApi
             to_remove.add( symbolEntity.getText() );
         }
 
-        String text = tweet.getText();
+        String text;
+
+        if(category.equals("retweets")){
+            text = tweet.getRetweetedStatus().getText();
+        }else{
+            text = tweet.getText();
+        }
 
         for(String d : to_remove)
         {

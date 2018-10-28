@@ -2,7 +2,6 @@ package Apps.Trends;
 
 
 import TwitterAnalytics.Hibernate;
-import TwitterAnalytics.InvertedIndex.InvertedIndex;
 import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.TrendSentiment;
 import TwitterAnalytics.Models.TrendsList;

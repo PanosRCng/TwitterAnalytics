@@ -2,7 +2,6 @@ package Apps.Trends;
 
 
 import TwitterAnalytics.Hibernate;
-import TwitterAnalytics.InvertedIndex.InvertedIndex;
 import TwitterAnalytics.Models.Hashtag;
 import TwitterAnalytics.Models.Trend;
 import TwitterAnalytics.Models.TrendsList;
@@ -133,7 +132,7 @@ public class Collection extends TimerTask implements RateLimitStatusListener
 
                     tweet_counter++;
 
-                    String clean_text = TwitterApi.cleanTweetText( tweet );
+                    String clean_text = TwitterApi.cleanTweetText(tweet,"tweets");
 
                     Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_text, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
                     trend.addTweet(tweetH);
