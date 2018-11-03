@@ -37,6 +37,7 @@ public class TweetService
 
     public static Tweet createTweet(String text, String clean_text, long twitter_id, Timestamp timestamp)
     {
+
         Query q = Hibernate.session().createQuery("from Tweet where twitter_id = :twitter_id");
         q.setParameter("twitter_id", twitter_id);
         List tweetsResults = q.getResultList();

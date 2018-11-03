@@ -1,5 +1,9 @@
 package Apps.Replies;
 
+import TwitterAnalytics.Hibernate;
+import TwitterAnalytics.Models.Reply;
+import TwitterAnalytics.Models.Tweet;
+import TwitterAnalytics.Services.TweetService;
 import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
 import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
@@ -71,7 +75,17 @@ public class DataCollection {
                 for (Status tweet : tweets){
                     if (tweet.getInReplyToStatusId()==tweetInput.getId()) {
 
-                        replies.put(tweetInput,0L);
+                        String clean_textH = TwitterApi.cleanTweetText(tweet,"tweets");
+
+                        Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+
+                        String clean_textY = TwitterApi.cleanTweetText(tweet,"tweets");
+                        Tweet tweetY = TweetService.createTweet( tweetInput.getText(), clean_textY, tweetInput.getId(), new java.sql.Timestamp(tweetInput.getCreatedAt().getTime()) );
+
+                        Reply reply = new Reply (tweetH,tweetY);
+                        Hibernate.save(reply);
+
+                        replies.put(tweet,0L);
 
                         System.out.println("Size "+replies.size());
 
