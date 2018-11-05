@@ -2,14 +2,16 @@ package TwitterAnalytics.Models;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name = "replies", uniqueConstraints = {@UniqueConstraint(columnNames = "id")})
-public class Reply implements Serializable {
+@Table(name = "replies", uniqueConstraints = {@UniqueConstraint(columnNames = {"id","reply","repliedTweet"})})
+public class Reply extends AbstractTimestampEntity implements Serializable {
 
-    public Reply(Tweet reply, Tweet repliedTweet) {
+    public Reply(Tweet reply, Tweet repliedTweet, Timestamp timestamp) {
         this.reply = reply;
         this.repliedTweet = repliedTweet;
+        this.timestamp = timestamp;
     }
 
     @Id
@@ -24,6 +26,9 @@ public class Reply implements Serializable {
     @ManyToOne
     @JoinColumn(name = "repliedTweet")
     private Tweet repliedTweet;
+
+    @Column(name = "timestamp")
+    private Timestamp timestamp;
 
     public Long getId() {
         return id;
@@ -49,12 +54,21 @@ public class Reply implements Serializable {
         this.repliedTweet = repliedTweet;
     }
 
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
-        return "Replies{" +
+        return "Reply{" +
                 "id=" + id +
                 ", reply=" + reply +
                 ", repliedTweet=" + repliedTweet +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

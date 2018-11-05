@@ -27,6 +27,7 @@
         <mapping class="TwitterAnalytics.Models.TrendSentiment"/>
         <mapping class="TwitterAnalytics.Models.TrendsList"/>
         <mapping class="TwitterAnalytics.Models.Reply"/>
+        <mapping class="TwitterAnalytics.Models.Retweet"/>
 
     </session-factory>
 </hibernate-configuration>
