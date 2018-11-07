@@ -4,19 +4,12 @@ import TwitterAnalytics.Hibernate;
 import TwitterAnalytics.Models.Reply;
 import TwitterAnalytics.Models.Tweet;
 import TwitterAnalytics.Services.TweetService;
-import TwitterAnalytics.TextAnalysis.Sentimenter.Sentimenter;
-import TwitterAnalytics.TextAnalysis.Stemmer.Stemmer;
 import TwitterAnalytics.TextAnalysis.Tokenizer.Tokenizer;
-import TwitterAnalytics.TextAnalysis.Utils;
 import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TimelinesResources;
 
-import java.text.DateFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 public class DataCollection {
 
@@ -26,9 +19,7 @@ public class DataCollection {
     }
 
 
-    public void collectionOverTime(String pagename, Map<Status,Integer> repliesCount, Paging paging, Map<Status,Long> tweets){
-
-        System.out.print("size of array : "+tweets.size());
+    public void collectionOverTime(String pagename, Paging paging){
 
         TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
@@ -38,27 +29,19 @@ public class DataCollection {
 
             ResponseList<Status> tweetsFetched = timelinesResource.getUserTimeline(user.getId(), paging);
 
-            int counter = 0;
             for(Status tweet : tweetsFetched) {
 
-                if(!repliesCount.containsKey(tweet)) repliesCount.put(tweet,0);
-                getReplies(pagename, tweet, tweets);
+                getReplies(pagename, tweet);
 
-                counter = counter + 1;
             }
-
-            System.out.println("Counter : "+counter);
 
         } catch(TwitterException e){
             e.printStackTrace();
         }
 
-        System.out.println("yoloooooo");
-        System.out.println(tweets.size());
-
     }
 
-    public void getReplies(String screenName, Status tweetInput, Map<Status,Long> replies) {
+    public void getReplies(String screenName, Status tweetInput) {
 
         Tokenizer tokenizer = new Tokenizer(); //, Status tweetInput
 
@@ -76,18 +59,13 @@ public class DataCollection {
                     if (tweet.getInReplyToStatusId()==tweetInput.getId()) {
 
                         String clean_textH = TwitterApi.cleanTweetText(tweet,"tweets");
-
                         Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
 
-                        String clean_textY = TwitterApi.cleanTweetText(tweet,"tweets");
+                        String clean_textY = TwitterApi.cleanTweetText(tweetInput,"tweets");
                         Tweet tweetY = TweetService.createTweet( tweetInput.getText(), clean_textY, tweetInput.getId(), new java.sql.Timestamp(tweetInput.getCreatedAt().getTime()) );
 
-                        Reply reply = new Reply (tweetH,tweetY);
+                        Reply reply = new Reply (tweetH,tweetY,tweetH.getTimestamp());
                         Hibernate.save(reply);
-
-                        replies.put(tweet,0L);
-
-                        System.out.println("Size "+replies.size());
 
                         System.out.println("Reply : "+tweet.getText());
                         System.out.println("TweetInput : "+tweetInput.getText());

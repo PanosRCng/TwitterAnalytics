@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 
 @Entity
-@Table(name = "tweets", uniqueConstraints = {@UniqueConstraint(columnNames = "id")})
+@Table(name = "tweets", uniqueConstraints = {@UniqueConstraint(columnNames = {"id","twitter_id"})})
 
 
 public class Tweet extends AbstractTimestampEntity implements Serializable
@@ -53,7 +53,6 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
     @Column(name = "timestamp")
     private Timestamp timestamp;
 
-
     public Long getId()
     {
         return id;
@@ -63,7 +62,6 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
     {
         this.id = id;
     }
-
 
     public Long getTwitterId()
     {
@@ -75,7 +73,6 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
         this.twitter_id = twitter_id;
     }
 
-
     public String getText()
     {
         return this.text;
@@ -86,7 +83,6 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
         this.text = text;
     }
 
-
     public String getCleanText()
     {
         return this.clean_text;
@@ -96,7 +92,6 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
     {
         this.clean_text = clean_text;
     }
-
 
     public Timestamp getTimestamp()
     {

@@ -2,18 +2,11 @@ package Apps.Replies;
 
 import Apps.GeneralFunctions;
 import twitter4j.Paging;
-import twitter4j.Status;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RepliesApp {
 
     private Paging paging;
     private int pageno = 1;
-
-    private Map<Status,Long> tweets = new HashMap<Status,Long>();
-    private Map<Status,Integer> repliesCounter = new HashMap<Status,Integer>();
 
     DataCollection collectionWorker = new DataCollection();
 
@@ -34,7 +27,7 @@ public class RepliesApp {
 
             paging = new Paging(pageno++, 1000);
 
-            collectionWorker.collectionOverTime("olympiacos_org",repliesCounter,paging, tweets);
+            collectionWorker.collectionOverTime("olympiacos_org",paging);
             System.out.println("Pageno : "+pageno);
             if(pageno==1000) pageno=1;
 

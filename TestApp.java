@@ -1,6 +1,7 @@
 import java.util.*;
 
 import Apps.Replies.RepliesApp;
+import Apps.Retweets.RetweetsApp;
 import Apps.Trends.TrendsApp;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -137,15 +138,10 @@ public class TestApp
 
 	public static void main(String[] args)
 	{
-		//TestApp testApp = new TestApp();
 
-		//testApp.search("#GolGR");
-		//testApp.findUsers("Kathimerini_gr");
+		//RepliesApp repliesApp = new RepliesApp();
 
-		//TrendsApp trendsApp = new TrendsApp();
-		RepliesApp repliesApp = new RepliesApp();
-
-		//StreamTestApp streamTestApp = new StreamTestApp();
+		RetweetsApp retweetsApp = new RetweetsApp();
 
 		System.out.println("all ok");
 	}
