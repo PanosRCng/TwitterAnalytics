@@ -2,6 +2,7 @@ package Apps.Retweets;
 
 import TwitterAnalytics.Hibernate;
 import TwitterAnalytics.Models.Retweet;
+import TwitterAnalytics.Models.Retweeter;
 import TwitterAnalytics.Models.Tweet;
 import TwitterAnalytics.Services.TweetService;
 import TwitterAnalytics.TwitterApi;
@@ -17,7 +18,7 @@ public class DataCollection {
 
     }
 
-    public void trackUserTimeLine(long userID, Paging paging, TimelinesResources timelinesResource){
+    public void trackUserTimeLine(long userID, Paging paging, TimelinesResources timelinesResource, boolean storeRetweeters){
 
         try {
             ResponseList<Status> tweets = timelinesResource.getUserTimeline(userID, paging);
@@ -38,6 +39,11 @@ public class DataCollection {
 
                     Retweet retweetY = new Retweet (tweetY,tweetH,tweetY.getTimestamp());
                     Hibernate.save(retweetY);
+
+                    if(storeRetweeters){
+                        Retweeter retweeter = new Retweeter (retweet.getUser().getId(), tweet.getUser().getId(), new java.sql.Timestamp(retweet.getCreatedAt().getTime()));
+                        Hibernate.save(retweeter);
+                    }
 
                 }
 

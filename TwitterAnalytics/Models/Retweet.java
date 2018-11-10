@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "retweets", uniqueConstraints = {@UniqueConstraint(columnNames = {"id","retweet","retweetedTweet"})})
+@Table(name = "retweets", uniqueConstraints = {@UniqueConstraint(columnNames = {"retweet","retweetedTweet"})})
 public class Retweet extends AbstractTimestampEntity implements Serializable {
 
     public Retweet(Tweet retweet, Tweet retweetedTweet, Timestamp timestamp) {

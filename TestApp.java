@@ -141,7 +141,7 @@ public class TestApp
 
 		//RepliesApp repliesApp = new RepliesApp();
 
-		RetweetsApp retweetsApp = new RetweetsApp();
+		RetweetsApp retweetsApp = new RetweetsApp(true);
 
 		System.out.println("all ok");
 	}

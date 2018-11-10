@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 
 @Entity
-@Table(name = "tweets", uniqueConstraints = {@UniqueConstraint(columnNames = {"id","twitter_id"})})
+@Table(name = "tweets", uniqueConstraints = {@UniqueConstraint(columnNames = {"twitter_id"})})
 
 
 public class Tweet extends AbstractTimestampEntity implements Serializable

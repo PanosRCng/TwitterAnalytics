@@ -18,7 +18,7 @@ public class RetweetsApp {
 
     TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
-    public RetweetsApp() {
+    public RetweetsApp(boolean storeRetweeters) {
 
         ResponseList<User> users = null;
         try {
@@ -43,7 +43,7 @@ public class RetweetsApp {
 
                 paging = new Paging(pageno++, 1000);
 
-                collectionWorker.trackUserTimeLine(userID, paging, timelinesResource);
+                collectionWorker.trackUserTimeLine(userID, paging, timelinesResource, storeRetweeters);
 
                 System.out.println("Pageno : "+pageno);
                 if(pageno==1000) pageno=1;
