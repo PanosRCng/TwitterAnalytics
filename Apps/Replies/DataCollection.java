@@ -59,10 +59,10 @@ public class DataCollection {
                     if (tweet.getInReplyToStatusId()==tweetInput.getId()) {
 
                         String clean_textH = TwitterApi.cleanTweetText(tweet,"tweets");
-                        Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                        Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()), tweet.isRetweet() );
 
                         String clean_textY = TwitterApi.cleanTweetText(tweetInput,"tweets");
-                        Tweet tweetY = TweetService.createTweet( tweetInput.getText(), clean_textY, tweetInput.getId(), new java.sql.Timestamp(tweetInput.getCreatedAt().getTime()) );
+                        Tweet tweetY = TweetService.createTweet( tweetInput.getText(), clean_textY, tweetInput.getId(), new java.sql.Timestamp(tweetInput.getCreatedAt().getTime()), tweetInput.isRetweet() );
 
                         Reply reply = new Reply (tweetH,tweetY,tweetH.getTimestamp());
                         Hibernate.save(reply);

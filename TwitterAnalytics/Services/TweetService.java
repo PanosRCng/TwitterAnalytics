@@ -17,7 +17,7 @@ import java.util.List;
 public class TweetService
 {
 
-    public static Tweet createTweet(String text, long twitter_id, Timestamp timestamp)
+    public static Tweet createTweet(String text, long twitter_id, Timestamp timestamp, Boolean retweetFlag)
     {
         Query q = Hibernate.session().createQuery("from Tweet where twitter_id = :twitter_id");
         q.setParameter("twitter_id", twitter_id);
@@ -28,14 +28,14 @@ public class TweetService
             return (Tweet) tweetsResults.get(0);
         }
 
-        Tweet tweet = new Tweet(text, twitter_id, timestamp);
+        Tweet tweet = new Tweet(text, twitter_id, timestamp, retweetFlag);
         Hibernate.save(tweet);
 
         return tweet;
     }
 
 
-    public static Tweet createTweet(String text, String clean_text, long twitter_id, Timestamp timestamp)
+    public static Tweet createTweet(String text, String clean_text, long twitter_id, Timestamp timestamp, Boolean retweetFlag)
     {
 
         Query q = Hibernate.session().createQuery("from Tweet where twitter_id = :twitter_id");
@@ -47,7 +47,7 @@ public class TweetService
             return (Tweet) tweetsResults.get(0);
         }
 
-        Tweet tweet = new Tweet(text, clean_text, twitter_id, timestamp);
+        Tweet tweet = new Tweet(text, clean_text, twitter_id, timestamp, retweetFlag);
         Hibernate.save(tweet);
 
         return tweet;

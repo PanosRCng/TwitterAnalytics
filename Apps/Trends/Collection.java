@@ -134,7 +134,7 @@ public class Collection extends TimerTask implements RateLimitStatusListener
 
                     String clean_text = TwitterApi.cleanTweetText(tweet,"tweets");
 
-                    Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_text, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                    Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_text, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()), tweet.isRetweet() );
                     trend.addTweet(tweetH);
 
                     for(HashtagEntity hashtagEntity : tweet.getHashtagEntities())

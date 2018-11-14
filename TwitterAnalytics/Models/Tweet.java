@@ -19,20 +19,22 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
     }
 
 
-    public Tweet(String text, long twitter_id, Timestamp timestamp)
+    public Tweet(String text, long twitter_id, Timestamp timestamp, Boolean retweetFlag)
     {
         this.text = text;
         this.twitter_id = twitter_id;
         this.timestamp = timestamp;
+        this.retweetFlag = retweetFlag;
     }
 
 
-    public Tweet(String text, String clean_text, long twitter_id, Timestamp timestamp)
+    public Tweet(String text, String clean_text, long twitter_id, Timestamp timestamp, Boolean retweetFlag)
     {
         this.text = text;
         this.twitter_id = twitter_id;
         this.clean_text = clean_text;
         this.timestamp = timestamp;
+        this.retweetFlag = retweetFlag;
     }
 
 
@@ -52,6 +54,9 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
 
     @Column(name = "timestamp")
     private Timestamp timestamp;
+
+    @Column(name = "retweetFlag")
+    private Boolean retweetFlag;
 
     public Long getId()
     {
@@ -101,5 +106,13 @@ public class Tweet extends AbstractTimestampEntity implements Serializable
     public void setTimestamp(Timestamp timestamp)
     {
         this.timestamp = timestamp;
+    }
+
+    public Boolean getRetweetFlag() {
+        return retweetFlag;
+    }
+
+    public void setRetweetFlag(Boolean retweetFlag) {
+        this.retweetFlag = retweetFlag;
     }
 }

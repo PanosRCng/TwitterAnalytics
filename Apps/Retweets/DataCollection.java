@@ -32,10 +32,10 @@ public class DataCollection {
                 {
 
                     String clean_textH = TwitterApi.cleanTweetText(tweet,"tweets");
-                    Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()) );
+                    Tweet tweetH = TweetService.createTweet( tweet.getText(), clean_textH, tweet.getId(), new java.sql.Timestamp(tweet.getCreatedAt().getTime()), tweet.isRetweet() );
 
                     String clean_textY = TwitterApi.cleanTweetText(retweet,"tweets");
-                    Tweet tweetY = TweetService.createTweet( retweet.getText(), clean_textY, retweet.getId(), new java.sql.Timestamp(retweet.getCreatedAt().getTime()) );
+                    Tweet tweetY = TweetService.createTweet( retweet.getText(), clean_textY, retweet.getId(), new java.sql.Timestamp(retweet.getCreatedAt().getTime()), retweet.isRetweet() );
 
                     Retweet retweetY = new Retweet (tweetY,tweetH,tweetY.getTimestamp());
                     Hibernate.save(retweetY);
