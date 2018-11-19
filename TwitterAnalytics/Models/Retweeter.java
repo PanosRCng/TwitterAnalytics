@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name = "retweeters", uniqueConstraints = {@UniqueConstraint(columnNames = {"retweeter_id","retweeted_user_id","timestamp"})})
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Retweeter extends AbstractTimestampEntity implements Serializable {
 
     public Retweeter(Long retweeter_id, Long retweeted_user_id, Timestamp timestamp) { ;

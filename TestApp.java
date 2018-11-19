@@ -1,6 +1,7 @@
 import java.util.*;
 
 import Apps.Replies.RepliesApp;
+import Apps.Retweeters.RetweetersApp;
 import Apps.Retweets.RetweetsApp;
 import Apps.Trends.TrendsApp;
 import twitter4j.Query;
@@ -141,7 +142,9 @@ public class TestApp
 
 		//RepliesApp repliesApp = new RepliesApp();
 
-		RetweetsApp retweetsApp = new RetweetsApp(true);
+		//RetweetsApp retweetsApp = new RetweetsApp(true);
+
+		RetweetersApp retweetersApp = new RetweetersApp();
 
 		System.out.println("all ok");
 	}
