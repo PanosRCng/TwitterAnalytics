@@ -1,13 +1,30 @@
 package Apps.Retweeters;
 
-import TwitterAnalytics.Services.HubRetweeterService;
+import Apps.GeneralFunctions;
+import twitter4j.Paging;
+
+import static TwitterAnalytics.Services.RetweeterService.getRetweeters;
 
 public class RetweetersApp {
 
-    private static final HubRetweeterService HubRetweeterServiceService = new HubRetweeterService();
+    DataCollection collectionWorker = new DataCollection();
 
     public RetweetersApp() {
 
-        System.out.println(HubRetweeterServiceService.getAll());
+        for(long retweeter_id : getRetweeters()){
+
+            GeneralFunctions generalFunctions = new GeneralFunctions();
+            boolean checkLimit = generalFunctions.checkRateLimit();
+            if(checkLimit) {
+                try {
+                    Thread.sleep(900000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            collectionWorker.trackUserTimeLine(retweeter_id);
+
+        }
     }
 }

@@ -29,7 +29,6 @@
         <mapping class="TwitterAnalytics.Models.Reply"/>
         <mapping class="TwitterAnalytics.Models.Retweet"/>
         <mapping class="TwitterAnalytics.Models.Retweeter"/>
-        <mapping class="TwitterAnalytics.Models.HubRetweeter"/>
 
     </session-factory>
 </hibernate-configuration>

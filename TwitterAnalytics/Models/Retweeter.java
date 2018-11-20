@@ -6,13 +6,13 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name = "retweeters", uniqueConstraints = {@UniqueConstraint(columnNames = {"retweeter_id","retweeted_user_id","timestamp"})})
-@Inheritance(strategy = InheritanceType.JOINED)
 public class Retweeter extends AbstractTimestampEntity implements Serializable {
 
-    public Retweeter(Long retweeter_id, Long retweeted_user_id, Timestamp timestamp) { ;
+    public Retweeter(Long retweeter_id, Long retweeted_user_id, Timestamp timestamp, Boolean appUserFlag) {
         this.retweeter_id = retweeter_id;
         this.retweeted_user_id = retweeted_user_id;
         this.timestamp = timestamp;
+        this.appUserFlag = appUserFlag;
     }
 
     @Id
@@ -28,6 +28,9 @@ public class Retweeter extends AbstractTimestampEntity implements Serializable {
 
     @Column(name = "timestamp")
     private Timestamp timestamp;
+
+    @Column(name = "appUserFlag")
+    private Boolean appUserFlag;
 
     public Long getId() {
         return id;
@@ -61,13 +64,11 @@ public class Retweeter extends AbstractTimestampEntity implements Serializable {
         this.timestamp = timestamp;
     }
 
-    @Override
-    public String toString() {
-        return "Retweeter{" +
-                "id=" + id +
-                ", retweeter_id=" + retweeter_id +
-                ", retweeted_user_id=" + retweeted_user_id +
-                ", timestamp=" + timestamp +
-                '}';
+    public Boolean getAppUserFlag() {
+        return appUserFlag;
+    }
+
+    public void setAppUserFlag(Boolean appUserFlag) {
+        this.appUserFlag = appUserFlag;
     }
 }

@@ -41,7 +41,7 @@ public class DataCollection {
                     Hibernate.save(retweetY);
 
                     if(storeRetweeters){
-                        Retweeter retweeter = new Retweeter (retweet.getUser().getId(), tweet.getUser().getId(), new java.sql.Timestamp(retweet.getCreatedAt().getTime()));
+                        Retweeter retweeter = new Retweeter (retweet.getUser().getId(), tweet.getUser().getId(), new java.sql.Timestamp(retweet.getCreatedAt().getTime()), Boolean.TRUE);
                         Hibernate.save(retweeter);
                     }
 
