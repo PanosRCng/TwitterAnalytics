@@ -8,6 +8,11 @@ import java.sql.Timestamp;
 @Table(name = "retweeters", uniqueConstraints = {@UniqueConstraint(columnNames = {"retweeter_id","retweeted_user_id","timestamp"})})
 public class Retweeter extends AbstractTimestampEntity implements Serializable {
 
+    public Retweeter()
+    {
+        //
+    }
+
     public Retweeter(Long retweeter_id, Long retweeted_user_id, Timestamp timestamp, Boolean appUserFlag) {
         this.retweeter_id = retweeter_id;
         this.retweeted_user_id = retweeted_user_id;

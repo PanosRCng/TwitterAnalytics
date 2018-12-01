@@ -11,7 +11,7 @@ public class RetweetersApp {
 
     public RetweetersApp() {
 
-        for(long retweeter_id : getRetweeters()){
+        for(long retweeter_id : getRetweeters(Boolean.TRUE)){
 
             GeneralFunctions generalFunctions = new GeneralFunctions();
             boolean checkLimit = generalFunctions.checkRateLimit();
