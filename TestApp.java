@@ -18,7 +18,7 @@ public class TestApp
 		//RetweetersApp retweetersApp = new RetweetersApp();
 
 		GeneralFunctions generalFunctions = new GeneralFunctions();
-		generalFunctions.printCentralityResult("alpha",Boolean.TRUE);
+		generalFunctions.storeCentralityResult("alpha");
 
 		System.out.println("all ok");
 	}

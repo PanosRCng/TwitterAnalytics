@@ -1,5 +1,7 @@
 package Apps;
 
+import TwitterAnalytics.Hibernate;
+import TwitterAnalytics.Models.HubRetweeter;
 import TwitterAnalytics.Models.Retweeter;
 import TwitterAnalytics.TwitterApi;
 import org.jgrapht.Graph;
@@ -175,7 +177,7 @@ public class GeneralFunctions {
         return(flag);
     }
 
-    public void printCentralityResult(String centrality, boolean printMostInfluentialPerson) {
+    public void storeCentralityResult(String centrality) {
 
         Graph<Long, DefaultEdge> graph = new DefaultDirectedGraph<Long, DefaultEdge>(DefaultEdge.class);
         Map<Long, Long> map;
@@ -218,33 +220,33 @@ public class GeneralFunctions {
 
         }
 
-        if(printMostInfluentialPerson){
-            try
-            {
-                UsersResources userResource = TwitterApi.client().users();
+        try
+        {
+            UsersResources userResource = TwitterApi.client().users();
 
-                Iterator iter = map.entrySet().iterator();
+            Iterator iter = map.entrySet().iterator();
 
-                Map.Entry<Long, Double> entry = (Map.Entry<Long, Double>) iter.next();
+            Map.Entry<Long, Double> entry = (Map.Entry<Long, Double>) iter.next();
 
-                Long key = entry.getKey();
+            Long key = entry.getKey();
 
-                User user = userResource.showUser(key);
+            User user = userResource.showUser(key);
 
-                System.out.println("Most influential person: " + user.getName() + " - " + user.getScreenName());
-                Double value = entry.getValue();
-                System.out.println("Score: " + Math.round(value * 100.0) / 100.0);
-                Set<DefaultEdge> userTweets = graph.edgesOf(key);
-                System.out.println("Number of edges: " + userTweets.size());
-                System.out.println("Location : " + user.getLocation());
+            System.out.println("Most influential person: " + user.getName() + " - " + user.getScreenName());
+            Double value = entry.getValue();
+            System.out.println("Score: " + Math.round(value * 100.0) / 100.0);
+            Set<DefaultEdge> userTweets = graph.edgesOf(key);
+            System.out.println("Number of edges: " + userTweets.size());
+            System.out.println("Location : " + user.getLocation());
 
-            }
-            catch(TwitterException twitterException)
-            {
-                twitterException.printStackTrace();
-                System.out.println("Failed : " + twitterException.getMessage());
-            }
+            HubRetweeter hubretweeter = new HubRetweeter (user.getName(), user.getScreenName(), (Math.round(value * 100.0) / 100.0), userTweets.size(), user.getLocation());
+            Hibernate.save(hubretweeter);
 
+        }
+        catch(TwitterException twitterException)
+        {
+            twitterException.printStackTrace();
+            System.out.println("Failed : " + twitterException.getMessage());
         }
     }
 
