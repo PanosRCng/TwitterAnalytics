@@ -31,7 +31,7 @@ public class DataCollection {
 
             for(Status tweet : tweetsFetched) {
 
-                getReplies(pagename, tweet);
+                getReplies(pagename, user.getId(), tweet);
 
             }
 
@@ -41,7 +41,7 @@ public class DataCollection {
 
     }
 
-    public void getReplies(String screenName, Status tweetInput) {
+    public void getReplies(String screenName, Long userId, Status tweetInput) {
 
         Tokenizer tokenizer = new Tokenizer(); //, Status tweetInput
 
@@ -64,10 +64,11 @@ public class DataCollection {
                         String clean_textY = TwitterApi.cleanTweetText(tweetInput,"tweets");
                         Tweet tweetY = TweetService.createTweet( tweetInput.getText(), clean_textY, tweetInput.getId(), new java.sql.Timestamp(tweetInput.getCreatedAt().getTime()), tweetInput.isRetweet() );
 
-                        Reply reply = new Reply (tweetH,tweetY,tweetH.getTimestamp());
+                        Reply reply = new Reply (tweetH.getId(),tweetY.getId(),tweetH.getTimestamp(),userId);
                         Hibernate.save(reply);
 
                         System.out.println("Reply : "+tweet.getText());
+                        System.out.println("Reply Date: "+tweet.getCreatedAt());
                         System.out.println("TweetInput : "+tweetInput.getText());
 
                     }

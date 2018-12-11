@@ -5,13 +5,14 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "replies", uniqueConstraints = {@UniqueConstraint(columnNames = {"reply","repliedTweet"})})
+@Table(name = "replies", uniqueConstraints = {@UniqueConstraint(columnNames = {"replyId","repliedTweetId"})})
 public class Reply extends AbstractTimestampEntity implements Serializable {
 
-    public Reply(Tweet reply, Tweet repliedTweet, Timestamp timestamp) {
-        this.reply = reply;
-        this.repliedTweet = repliedTweet;
+    public Reply(Long replyId, Long repliedTweetId, Timestamp timestamp, Long userIdOfRepliedTweet) {
+        this.replyId = replyId;
+        this.repliedTweetId = repliedTweetId;
         this.timestamp = timestamp;
+        this.userIdOfRepliedTweet = userIdOfRepliedTweet;
     }
 
     @Id
@@ -19,16 +20,17 @@ public class Reply extends AbstractTimestampEntity implements Serializable {
     @Column(name = "id", unique = true)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "reply")
-    private Tweet reply;
+    @Column(name = "replyId")
+    private Long replyId;
 
-    @ManyToOne
-    @JoinColumn(name = "repliedTweet")
-    private Tweet repliedTweet;
+    @Column(name = "repliedTweetId")
+    private Long repliedTweetId;
 
     @Column(name = "timestamp")
     private Timestamp timestamp;
+
+    @Column(name = "userIdOfRepliedTweet")
+    private Long userIdOfRepliedTweet;
 
     public Long getId() {
         return id;
@@ -38,20 +40,20 @@ public class Reply extends AbstractTimestampEntity implements Serializable {
         this.id = id;
     }
 
-    public Tweet getReply() {
-        return reply;
+    public Long getReplyId() {
+        return replyId;
     }
 
-    public void setReply(Tweet reply) {
-        this.reply = reply;
+    public void setReplyId(Long replyId) {
+        this.replyId = replyId;
     }
 
-    public Tweet getRepliedTweet() {
-        return repliedTweet;
+    public Long getRepliedTweetId() {
+        return repliedTweetId;
     }
 
-    public void setRepliedTweet(Tweet repliedTweet) {
-        this.repliedTweet = repliedTweet;
+    public void setRepliedTweetId(Long repliedTweetId) {
+        this.repliedTweetId = repliedTweetId;
     }
 
     public Timestamp getTimestamp() {
@@ -62,13 +64,22 @@ public class Reply extends AbstractTimestampEntity implements Serializable {
         this.timestamp = timestamp;
     }
 
+    public Long getUserIdOfRepliedTweet() {
+        return userIdOfRepliedTweet;
+    }
+
+    public void setUserIdOfRepliedTweet(Long userIdOfRepliedTweet) {
+        this.userIdOfRepliedTweet = userIdOfRepliedTweet;
+    }
+
     @Override
     public String toString() {
         return "Reply{" +
                 "id=" + id +
-                ", reply=" + reply +
-                ", repliedTweet=" + repliedTweet +
+                ", replyId=" + replyId +
+                ", repliedTweetId=" + repliedTweetId +
                 ", timestamp=" + timestamp +
+                ", userIdOfRepliedTweet=" + userIdOfRepliedTweet +
                 '}';
     }
 }
