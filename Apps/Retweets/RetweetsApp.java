@@ -18,6 +18,8 @@ public class RetweetsApp {
 
     TimelinesResources timelinesResource = TwitterApi.client().timelines();
 
+    GeneralFunctions generalFunctions = new GeneralFunctions();
+
     public RetweetsApp(boolean storeRetweeters) {
 
         ResponseList<User> users = null;
@@ -31,15 +33,7 @@ public class RetweetsApp {
 
             while(true){
 
-                GeneralFunctions generalFunctions = new GeneralFunctions();
-                boolean checkLimit = generalFunctions.checkRateLimit();
-                if(checkLimit) {
-                    try {
-                        Thread.sleep(900000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                generalFunctions.checkRateLimitAndDelay();
 
                 paging = new Paging(pageno++, 1000);
 

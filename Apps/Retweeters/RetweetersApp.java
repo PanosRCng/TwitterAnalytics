@@ -7,21 +7,15 @@ import static TwitterAnalytics.Services.RetweeterService.getRetweeters;
 
 public class RetweetersApp {
 
+    GeneralFunctions generalFunctions = new GeneralFunctions();
+
     DataCollection collectionWorker = new DataCollection();
 
     public RetweetersApp() {
 
         for(long retweeter_id : getRetweeters(Boolean.TRUE)){
 
-            GeneralFunctions generalFunctions = new GeneralFunctions();
-            boolean checkLimit = generalFunctions.checkRateLimit();
-            if(checkLimit) {
-                try {
-                    Thread.sleep(900000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            generalFunctions.checkRateLimitAndDelay();
 
             collectionWorker.trackUserTimeLine(retweeter_id);
 

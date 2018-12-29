@@ -10,20 +10,14 @@ public class RepliesApp {
 
     DataCollection collectionWorker = new DataCollection();
 
+    GeneralFunctions generalFunctions = new GeneralFunctions();
+
     public RepliesApp()
     {
 
         while(true){
 
-            GeneralFunctions generalFunctions = new GeneralFunctions();
-            boolean checkLimit = generalFunctions.checkRateLimit();
-            if(checkLimit) {
-                try {
-                    Thread.sleep(900000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            generalFunctions.checkRateLimitAndDelay();
 
             paging = new Paging(pageno++, 1000);
 

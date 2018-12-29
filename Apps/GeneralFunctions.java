@@ -164,7 +164,6 @@ public class GeneralFunctions {
                 }
 
 
-
             }
 
         }
@@ -175,6 +174,18 @@ public class GeneralFunctions {
         }
 
         return(flag);
+    }
+
+    public void checkRateLimitAndDelay(){
+
+        boolean checkLimit = checkRateLimit();
+        if(checkLimit) {
+            try {
+                Thread.sleep(900000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void storeCentralityResult(String centrality) {

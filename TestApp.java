@@ -1,3 +1,4 @@
+import Apps.FetchDataOverTime;
 import Apps.GeneralFunctions;
 import Apps.Replies.RepliesApp;
 import Apps.Retweeters.RetweetersApp;
@@ -11,7 +12,7 @@ public class TestApp
 	public static void main(String[] args)
 	{
 
-		RepliesApp repliesApp = new RepliesApp();
+		//RepliesApp repliesApp = new RepliesApp();
 
 		//RetweetsApp retweetsApp = new RetweetsApp(true);
 
@@ -19,6 +20,8 @@ public class TestApp
 
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 		//generalFunctions.storeCentralityResult("alpha");
+
+		FetchDataOverTime fetchDataOverTime = new FetchDataOverTime();
 
 		System.out.println("all ok");
 	}
