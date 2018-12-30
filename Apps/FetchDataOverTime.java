@@ -7,6 +7,9 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.api.TimelinesResources;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static TwitterAnalytics.Services.RetweeterService.getRetweeters;
 
 public class FetchDataOverTime {
@@ -22,6 +25,12 @@ public class FetchDataOverTime {
         int mode = 1;
 
         String screenName = "olympiacos_org";
+
+        boolean useTimePeriod = Boolean.TRUE;
+        // 1 week
+        String since = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()-7*24*60*60*1000));
+        // today
+        String until = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 
         ResponseList<User> users = null;
         try {
@@ -50,7 +59,11 @@ public class FetchDataOverTime {
             // Retweets
             if(mode==1){
 
-                collectionWorkerRetweets.trackUserTimeLine(userID, paging, timelinesResource, Boolean.TRUE);
+                if(useTimePeriod){
+                    collectionWorkerRetweets.trackUserTimeLine(generalFunctions, screenName, since, until, Boolean.TRUE);
+                }else{
+                    collectionWorkerRetweets.trackUserTimeLine(userID, paging, timelinesResource, Boolean.TRUE);
+                }
 
                 mode = 2;
 
@@ -60,9 +73,7 @@ public class FetchDataOverTime {
             }else if(mode==2){
 
                 for(long retweeter_id : getRetweeters(Boolean.TRUE)){
-
-                    collectionWorkerRetweeters.trackUserTimeLine(retweeter_id);
-
+                    collectionWorkerRetweeters.trackUserTimeLine(retweeter_id, Boolean.TRUE);
                 }
 
                 mode = 3;
@@ -72,7 +83,11 @@ public class FetchDataOverTime {
             // Replies
             }else{
 
-                collectionWorkerReplies.collectionOverTime(screenName,paging);
+                if(useTimePeriod){
+                    collectionWorkerReplies.collectionOverTime(generalFunctions, screenName);
+                }else{
+                    collectionWorkerReplies.collectionOverTime(screenName,paging);
+                }
 
                 mode = 1;
 

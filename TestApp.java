@@ -12,11 +12,11 @@ public class TestApp
 	public static void main(String[] args)
 	{
 
-		//RepliesApp repliesApp = new RepliesApp();
+		//RepliesApp repliesApp = new RepliesApp(Boolean.TRUE);
 
-		//RetweetsApp retweetsApp = new RetweetsApp(true);
+		//RetweetsApp retweetsApp = new RetweetsApp(Boolean.TRUE, Boolean.TRUE);
 
-		//RetweetersApp retweetersApp = new RetweetersApp();
+		//RetweetersApp retweetersApp = new RetweetersApp(Boolean.TRUE);
 
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 		//generalFunctions.storeCentralityResult("alpha");

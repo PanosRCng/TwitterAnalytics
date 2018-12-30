@@ -12,18 +12,28 @@ public class RepliesApp {
 
     GeneralFunctions generalFunctions = new GeneralFunctions();
 
-    public RepliesApp()
+    public RepliesApp(boolean useTimePeriod)
     {
 
-        while(true){
+        String screenName = "olympiacos_org";
 
-            generalFunctions.checkRateLimitAndDelay();
+        if(useTimePeriod){
 
-            paging = new Paging(pageno++, 1000);
+            collectionWorker.collectionOverTime(generalFunctions, screenName);
 
-            collectionWorker.collectionOverTime("olympiacos_org",paging);
-            System.out.println("Pageno : "+pageno);
-            if(pageno==1000) pageno=1;
+        }else{
+
+            while(true){
+
+                generalFunctions.checkRateLimitAndDelay();
+
+                paging = new Paging(pageno++, 1000);
+
+                collectionWorker.collectionOverTime(screenName,paging);
+                System.out.println("Pageno : "+pageno);
+                if(pageno==1000) pageno=1;
+
+            }
 
         }
     }

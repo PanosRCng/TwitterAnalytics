@@ -11,13 +11,13 @@ public class RetweetersApp {
 
     DataCollection collectionWorker = new DataCollection();
 
-    public RetweetersApp() {
+    public RetweetersApp(boolean useTimePeriod) {
 
         for(long retweeter_id : getRetweeters(Boolean.TRUE)){
 
             generalFunctions.checkRateLimitAndDelay();
 
-            collectionWorker.trackUserTimeLine(retweeter_id);
+            collectionWorker.trackUserTimeLine(retweeter_id, useTimePeriod);
 
         }
     }

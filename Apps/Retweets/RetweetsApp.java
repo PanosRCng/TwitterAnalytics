@@ -8,6 +8,9 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.api.TimelinesResources;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class RetweetsApp {
 
     private Paging paging;
@@ -20,27 +23,42 @@ public class RetweetsApp {
 
     GeneralFunctions generalFunctions = new GeneralFunctions();
 
-    public RetweetsApp(boolean storeRetweeters) {
+    public RetweetsApp(boolean storeRetweeters, boolean useTimePeriod) {
 
         ResponseList<User> users = null;
+        String screenName = "olympiacos_org";
+
         try {
-            users = TwitterApi.client().searchUsers("olympiacos_org", -1);
+            users = TwitterApi.client().searchUsers(screenName, -1);
 
             for (User user : users) {
                 userID = user.getId();
                 break;
             }
 
-            while(true){
+            if(useTimePeriod) {
 
-                generalFunctions.checkRateLimitAndDelay();
+                // 1 week
+                String since = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()-7*24*60*60*1000));
+                // today
+                String until = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 
-                paging = new Paging(pageno++, 1000);
+                collectionWorker.trackUserTimeLine(generalFunctions, screenName, since, until, storeRetweeters);
 
-                collectionWorker.trackUserTimeLine(userID, paging, timelinesResource, storeRetweeters);
+            }else {
 
-                System.out.println("Pageno : "+pageno);
-                if(pageno==1000) pageno=1;
+                while(true){
+
+                    generalFunctions.checkRateLimitAndDelay();
+
+                    paging = new Paging(pageno++, 1000);
+
+                    collectionWorker.trackUserTimeLine(userID, paging, timelinesResource, storeRetweeters);
+
+                    System.out.println("Pageno : "+pageno);
+                    if(pageno==1000) pageno=1;
+                }
+
             }
         } catch (TwitterException e) {
             e.printStackTrace();

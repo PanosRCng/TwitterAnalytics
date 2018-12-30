@@ -1,5 +1,6 @@
 package Apps.Replies;
 
+import Apps.GeneralFunctions;
 import TwitterAnalytics.Hibernate;
 import TwitterAnalytics.Models.Reply;
 import TwitterAnalytics.Models.Tweet;
@@ -9,6 +10,8 @@ import TwitterAnalytics.TwitterApi;
 import twitter4j.*;
 import twitter4j.api.TimelinesResources;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class DataCollection {
@@ -41,9 +44,44 @@ public class DataCollection {
 
     }
 
-    public void getReplies(String screenName, Long userId, Status tweetInput) {
+    public void collectionOverTime(GeneralFunctions generalFunctions, String pagename){
 
-        Tokenizer tokenizer = new Tokenizer(); //, Status tweetInput
+        try {
+
+            User user = TwitterApi.client().showUser(pagename);
+
+            // 1 week
+            String since = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()-7*24*60*60*1000));
+            // today
+            String until = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+            Query query = new Query("from:"+pagename + " since:" + since + " until:" + until);
+
+            QueryResult results;
+
+            do {
+
+                results = TwitterApi.client().search(query);
+
+                List<Status> tweetsFetched = results.getTweets();
+
+                for(Status tweet : tweetsFetched) {
+
+                    generalFunctions.checkRateLimitAndDelay();
+
+                    getReplies(pagename, user.getId(), tweet);
+
+                }
+
+            } while ((query = results.nextQuery()) != null);
+
+        } catch(TwitterException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void getReplies(String screenName, Long userId, Status tweetInput) {
 
         try {
             Query query = new Query("to:"+screenName + " since_id:" + tweetInput.getId());
