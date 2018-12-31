@@ -34,7 +34,7 @@ public class DataCollection {
 
                 User user = TwitterApi.client().showUser(userID);
 
-                Query query = new Query("from:"+user.getName() + " since:" + since + " until:" + until);
+                Query query = new Query("from:"+user.getScreenName() + " since:" + since + " until:" + until);
 
                 QueryResult results;
 

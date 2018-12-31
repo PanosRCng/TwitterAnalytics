@@ -188,10 +188,9 @@ public class GeneralFunctions {
         }
     }
 
-    public void storeCentralityResult(String centrality) {
+    public Graph<Long, DefaultEdge> createHubUsersTree(){
 
         Graph<Long, DefaultEdge> graph = new DefaultDirectedGraph<Long, DefaultEdge>(DefaultEdge.class);
-        Map<Long, Long> map;
 
         for(Retweeter retweeter : getRetweets(Boolean.FALSE)){
 
@@ -203,6 +202,15 @@ public class GeneralFunctions {
             }
             graph.addEdge(retweeter.getRetweeter_id(), retweeter.getRetweeted_user_id());
         }
+
+        return graph;
+    }
+
+    public void storeCentralityResult(String centrality) {
+
+        Map<Long, Long> map;
+
+        Graph<Long, DefaultEdge> graph = createHubUsersTree();
 
         if (centrality.equals("alpha")) {
 

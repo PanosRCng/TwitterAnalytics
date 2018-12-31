@@ -1,10 +1,4 @@
-import Apps.FetchDataOverTime;
-import Apps.GeneralFunctions;
-import Apps.Replies.RepliesApp;
-import Apps.Retweeters.RetweetersApp;
-import Apps.Retweets.RetweetsApp;
-
-import static java.lang.Boolean.TRUE;
+import Apps.HubUsersServlet.HubUsersServletApp;
 
 public class TestApp
 {
@@ -21,7 +15,9 @@ public class TestApp
 		//GeneralFunctions generalFunctions = new GeneralFunctions();
 		//generalFunctions.storeCentralityResult("alpha");
 
-		FetchDataOverTime fetchDataOverTime = new FetchDataOverTime();
+		//FetchDataOverTime fetchDataOverTime = new FetchDataOverTime();
+
+		HubUsersServletApp hubUsersServletApp = new HubUsersServletApp();
 
 		System.out.println("all ok");
 	}
