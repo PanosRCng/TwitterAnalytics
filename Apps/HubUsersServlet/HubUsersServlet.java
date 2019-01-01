@@ -4,6 +4,7 @@ package Apps.HubUsersServlet;
 import Apps.GeneralFunctions;
 import TwitterAnalytics.TwitterApi;
 import com.google.common.base.Joiner;
+import com.google.gson.Gson;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.scoring.AlphaCentrality;
 import org.jgrapht.graph.DefaultEdge;
@@ -30,6 +31,10 @@ public class HubUsersServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        resp.setHeader("Access-Control-Allow-Methods", "GET");
+        resp.setContentType("application/json");
+
         GeneralFunctions generalFunctions = new GeneralFunctions();
 
         int k = 10;
@@ -51,6 +56,8 @@ public class HubUsersServlet extends HttpServlet {
 
         List<String> entries = new ArrayList<String>(k);
 
+        Gson gson = new Gson();
+
         int counter = 0;
 
         for (Map.Entry<Long, Double> entry : map.entrySet())
@@ -59,7 +66,7 @@ public class HubUsersServlet extends HttpServlet {
 
                 user = userResource.showUser(entry.getKey());
 
-                entries.add(String.format("{\"screenName\": \"%s\"}", user.getScreenName()));
+                entries.add(gson.toJson(user));
 
                 counter++;
 
