@@ -24,8 +24,17 @@ import java.util.Map;
 public class HubUsersServlet extends HttpServlet {
 
     private static final Joiner JOINER = Joiner.on(",\n");
+    Map<Long, Double> map;
 
     public HubUsersServlet() {
+
+        GeneralFunctions generalFunctions = new GeneralFunctions();
+
+        Graph<Long, DefaultEdge> graph = generalFunctions.createHubUsersTree();
+        AlphaCentrality alphaCentrality = new AlphaCentrality(graph);
+
+        map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
+
     }
 
     @Override
@@ -34,8 +43,6 @@ public class HubUsersServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         resp.setHeader("Access-Control-Allow-Methods", "GET");
         resp.setContentType("application/json");
-
-        GeneralFunctions generalFunctions = new GeneralFunctions();
 
         int k = 10;
         String p = req.getParameter("k");
@@ -47,11 +54,7 @@ public class HubUsersServlet extends HttpServlet {
             }
         }
 
-        Graph<Long, DefaultEdge> graph = generalFunctions.createHubUsersTree();
-        AlphaCentrality alphaCentrality = new AlphaCentrality(graph);
-        Map<Long, Double> map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
-
-        User user = null;
+        User user;
         UsersResources userResource = TwitterApi.client().users();
 
         List<String> entries = new ArrayList<String>(k);
