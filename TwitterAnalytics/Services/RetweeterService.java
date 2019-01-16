@@ -21,9 +21,9 @@ public class RetweeterService {
 
     public static List<Retweeter> getRetweets(Boolean appUserFlag) {
 
-        Query q = Hibernate.session().createQuery("from Retweeter where appUserFlag = :appUserFlag");
+        Query q = Hibernate.session().createQuery("from Retweeter where app_user_flag = :appUserFlag");
         q.setParameter("appUserFlag", appUserFlag);
-
+        System.out.println(q.toString());
         List tweetsResults = q.getResultList();
 
         return tweetsResults;

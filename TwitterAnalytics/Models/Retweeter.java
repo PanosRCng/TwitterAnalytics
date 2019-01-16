@@ -34,7 +34,7 @@ public class Retweeter extends AbstractTimestampEntity implements Serializable {
     @Column(name = "timestamp")
     private Timestamp timestamp;
 
-    @Column(name = "appUserFlag")
+    @Column(name = "app_user_flag")
     private Boolean appUserFlag;
 
     public Long getId() {
