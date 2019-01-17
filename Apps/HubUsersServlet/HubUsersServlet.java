@@ -5,6 +5,9 @@ import Apps.GeneralFunctions;
 import TwitterAnalytics.TwitterApi;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.scoring.AlphaCentrality;
 import org.jgrapht.graph.DefaultEdge;
@@ -24,17 +27,14 @@ import java.util.Map;
 public class HubUsersServlet extends HttpServlet {
 
     private static final Joiner JOINER = Joiner.on(",\n");
-    Map<Long, Double> map;
+
+    CacheManager cm;
 
     public HubUsersServlet() {
 
-        GeneralFunctions generalFunctions = new GeneralFunctions();
-
-        Graph<Long, DefaultEdge> graph = generalFunctions.createHubUsersTree();
-        AlphaCentrality alphaCentrality = new AlphaCentrality(graph);
-
-        map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
-
+        cm = CacheManager.getInstance();
+        cm.clearAll();
+        cm.addCache("cache1");
     }
 
     @Override
@@ -45,43 +45,61 @@ public class HubUsersServlet extends HttpServlet {
         resp.setContentType("application/json");
 
         int k = 10;
-        String p = req.getParameter("k");
-        if (p != null) {
-            try {
-                k = Integer.parseInt(p);
-            } catch (NumberFormatException e) {
-                // Just eat it, don't need to worry.
-            }
-        }
-
-        User user;
-        UsersResources userResource = TwitterApi.client().users();
 
         List<String> entries = new ArrayList<String>(k);
 
-        Gson gson = new Gson();
+        Cache cache = cm.getCache("cache1");
 
-        int counter = 0;
+        if(cache.get("1")==null) {
 
-        for (Map.Entry<Long, Double> entry : map.entrySet())
-        {
-            try {
+            GeneralFunctions generalFunctions = new GeneralFunctions();
 
-                user = userResource.showUser(entry.getKey());
+            Graph<Long, DefaultEdge> graph = generalFunctions.createHubUsersTree();
+            AlphaCentrality alphaCentrality = new AlphaCentrality(graph);
 
-                entries.add(gson.toJson(user));
+            Map<Long, Double> map = GeneralFunctions.sortByValue(alphaCentrality.getScores());
 
-                counter++;
-
-                if(counter==10) break;
-
-            }catch (TwitterException e) {
-                e.printStackTrace();
+            String p = req.getParameter("k");
+            if (p != null) {
+                try {
+                    k = Integer.parseInt(p);
+                } catch (NumberFormatException e) {
+                    // Just eat it, don't need to worry.
+                }
             }
+
+            User user;
+            UsersResources userResource = TwitterApi.client().users();
+
+            Gson gson = new Gson();
+
+            int counter = 0;
+
+            for (Map.Entry<Long, Double> entry : map.entrySet()) {
+                try {
+
+                    user = userResource.showUser(entry.getKey());
+
+                    entries.add(gson.toJson(user));
+
+                    counter++;
+
+                    if (counter == 10) break;
+
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            Element element = new Element("1", "[\n" + JOINER.join(entries) + "\n]");
+            element.setTimeToLive(15);
+
+            cache.put(element);
 
         }
 
-        resp.getWriter().println("[\n" + JOINER.join(entries) + "\n]");
+        resp.getWriter().println(cache.get("1").getObjectValue().toString());
 
     }
 }
