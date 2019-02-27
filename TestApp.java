@@ -1,4 +1,5 @@
 import Apps.HubUsersServlet.HubUsersServletApp;
+import Apps.RetweetersServlet.RetweetersServletApp;
 
 public class TestApp
 {
@@ -17,7 +18,9 @@ public class TestApp
 
 		//FetchDataOverTime fetchDataOverTime = new FetchDataOverTime();
 
-		HubUsersServletApp hubUsersServletApp = new HubUsersServletApp();
+		//HubUsersServletApp hubUsersServletApp = new HubUsersServletApp();
+
+		RetweetersServletApp retweetersServletApp = new RetweetersServletApp();
 
 		System.out.println("all ok");
 	}
