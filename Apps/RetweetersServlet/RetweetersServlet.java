@@ -4,7 +4,6 @@ import TwitterAnalytics.TwitterApi;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.api.UsersResources;
@@ -20,6 +19,16 @@ import java.util.List;
 import static TwitterAnalytics.Services.RetweeterService.getDistinctRetweetersSelectedDates;
 
 public class RetweetersServlet extends HttpServlet {
+
+    private static class DataObject {
+        private User user;
+        private int Number_Retweets;
+
+        public DataObject(User user, int Number_Retweets) {
+            this.user = user;
+            this.Number_Retweets = Number_Retweets;
+        }
+    }
 
     private static final Joiner JOINER = Joiner.on(",\n");
 
@@ -48,8 +57,9 @@ public class RetweetersServlet extends HttpServlet {
             try {
                 JsonArray tempObject = gson.toJsonTree(results.get(i)).getAsJsonArray();
 
-                user = userResource.showUser(tempObject.get(0).getAsLong());
-                entries.add(gson.toJson(user));
+
+                entries.add(gson.toJson(new DataObject(userResource.showUser(tempObject.get(0).getAsLong()),
+                                                       tempObject.get(1).getAsInt())));
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
